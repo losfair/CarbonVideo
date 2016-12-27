@@ -1,0 +1,12 @@
+/user/authenticate
+/user/check
+	Request:
+		{
+			"token": "token"
+		}
+	Response:
+		{
+			"isLoggedIn": true
+		}
+
+
