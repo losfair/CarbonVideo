@@ -12,6 +12,8 @@ app.use(bodyParser.json());
 app.post("/config/sso_url", requestHandlers.onGetSsoUrl);
 app.post("/user/authenticate", requestHandlers.onUserAuthenticate);
 app.post("/user/check", requestHandlers.onUserCheck);
+app.post("/video/new", requestHandlers.onNewVideo);
+app.post("/video/count", requestHandlers.onGetVideoCount);
 
 async function run() {
     await resources.init();

@@ -1,3 +1,5 @@
+import * as network from "./network.js";
+
 export function getParameterByName(name, url) {
     if (!url) {
         url = window.location.href;
@@ -20,4 +22,31 @@ export function bindActionById(id, event, cb) {
     let elem = document.getElementById(id);
     if(!elem) return;
     elem.addEventListener(event, cb);
+}
+
+export async function loadPageModule(elem, url) {
+    let allModules = document.getElementsByClassName("page-module");
+    for(let i = 0; i < allModules.length; i++) {
+        let m = allModules[i];
+        m.style.display = "none";
+        m.innerHTML = "";
+    }
+    if(typeof(elem) == "string") elem = document.getElementById(elem);
+    if(!elem) return;
+    let pageModuleContent = await network.makeRequest(
+        "GET",
+        url
+    );
+    elem.innerHTML = pageModuleContent;
+
+    let scripts = elem.getElementsByTagName("script");
+    for(let i = 0; i < scripts.length; i++) {
+        let scriptElem = document.createElement("script");
+        if(scripts[i].src) scriptElem.src = scripts[i].src;
+        else scriptElem.innerHTML = scripts[i].innerHTML;
+        document.body.appendChild(scriptElem);
+        document.body.removeChild(scriptElem);
+    }
+
+    elem.style.display = "block";
 }

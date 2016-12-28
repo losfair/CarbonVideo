@@ -2,6 +2,7 @@ import "babel-polyfill";
 import * as network from "./network.js";
 import * as pageUtils from "./pageUtils.js";
 import * as authUtils from "./authUtils.js";
+import * as videoManager from "./videoManager.js";
 
 async function jumpToSsoLogin() {
     let url = await authUtils.getSsoUrl();
@@ -10,15 +11,26 @@ async function jumpToSsoLogin() {
 
 function doLogout() {
     delete localStorage.sessionToken;
-    location.reload();
+    window.location.reload();
 }
 
 function initEventListeners() {
     pageUtils.bindActionById("logout-button", "click", doLogout);
 }
 
+async function updatePortalContent() {
+    pageUtils.setElementInnerHtmlById("video-count", await videoManager.getVideoCount());
+}
+
+function initGlobalExports() {
+    window.loadPageModule = pageUtils.loadPageModule;
+    window.onCreateVideo = videoManager.onCreateVideo;
+    window.updatePortalContent = updatePortalContent;
+}
+
 async function initPage() {
     initEventListeners();
+    initGlobalExports();
     if(pageUtils.getParameterByName("client_token")) {
         let result = await authUtils.doSsoAuthenticate(pageUtils.getParameterByName("client_token"));
         if(!result) {
@@ -26,7 +38,6 @@ async function initPage() {
         }
         localStorage.sessionToken = result;
         window.location.replace(window.location.href.split("?")[0]);
-        window.location.reload();
         return;
     }
 
@@ -41,6 +52,7 @@ async function initPage() {
     }
 
     pageUtils.setElementInnerHtmlById("current-username-navbar", authUtils.getUsername());
+    pageUtils.loadPageModule("portal-page", "portal.html");
 }
 
 if(document.body) {

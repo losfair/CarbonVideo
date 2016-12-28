@@ -1,0 +1,32 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">
+            发布新视频
+        </h3>
+    </div>
+    <div class="panel-body">
+        <form role="form">
+            <div class="form-group">
+                <label for="videoTitle">
+						视频标题
+					</label>
+                <input type="text" class="form-control" id="videoTitle">
+            </div>
+            <div class="form-group">
+                <label for="videoUrl">
+						视频地址
+					</label>
+                <input type="text" class="form-control" id="videoUrl">
+            </div>
+            <div class="form-group">
+                <label for="videoDesc">
+						视频说明
+					</label>
+                <textarea class="form-control" id="videoDesc" rows="10"></textarea>
+            </div>
+            <button class="btn btn-default" onclick="onCreateVideo()">
+					发布
+				</button>
+        </form>
+    </div>
+</div>
