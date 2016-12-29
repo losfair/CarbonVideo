@@ -1,5 +1,7 @@
 import * as network from "./network.js";
 
+let pageModuleCache = {};
+
 export function getParameterByName(name, url) {
     if (!url) {
         url = window.location.href;
@@ -33,10 +35,18 @@ export async function loadPageModule(elem, url) {
     }
     if(typeof(elem) == "string") elem = document.getElementById(elem);
     if(!elem) return;
-    let pageModuleContent = await network.makeRequest(
-        "GET",
-        url
-    );
+
+    let pageModuleContent = "";
+
+    let contentCache = pageModuleCache[url];
+    if(contentCache) pageModuleContent = contentCache;
+    else {
+        pageModuleContent = await network.makeRequest(
+            "GET",
+            url
+        );
+        pageModuleCache[url] = pageModuleContent;
+    }
     elem.innerHTML = pageModuleContent;
 
     let scripts = elem.getElementsByTagName("script");
