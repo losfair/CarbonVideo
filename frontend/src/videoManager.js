@@ -86,8 +86,58 @@ export async function getVideoInfo(id) {
     return result.videoInfo;
 }
 
-export async function updateVideoView() {
-    let targetVideoId = pageUtils.getParameterByName("videoId");
+export async function getLatestVideos(count) {
+    let token = authUtils.getSessionToken();
+
+    let result = await network.makeRequest(
+        "POST",
+        "/video/latest",
+        JSON.stringify({
+            "token": token,
+            "count": count
+        }), {
+            "Content-Type": "application/json"
+        }
+    );
+    if(!result) return null;
+    try {
+        result = JSON.parse(result);
+    } catch(e) {
+        return null;
+    }
+
+    if(result.result != "success") {
+        return null;
+    }
+
+    return result.latestVideos;
+}
+
+export function setCurrentVideoId(id) {
+    currentVideoId = id;
+}
+
+export async function showLatestVideos() {
+    let videos = await getLatestVideos(5);
+    if(!videos) {
+        pageUtils.showWarningBox("无法获取最新视频。");
+        return "";
+    }
+    let result = "<ul>";
+    videos.forEach((v) => {
+        result += "<li><a href=\"javascript:;\" onclick=\"setCurrentVideoId('"
+            + v.videoId
+            + "');loadPageModule('video-view-page', 'videoView.html')\">"
+            + v.videoTitle
+            + "</a></li>";
+    });
+    result += "</ul>";
+    return result;
+}
+
+export async function updateVideoView(targetVideoId) {
+    if(!targetVideoId) targetVideoId = pageUtils.getParameterByName("videoId");
+    if(!targetVideoId) targetVideoId = currentVideoId;
     if(!targetVideoId) {
         pageUtils.showWarningBox("未提供目标视频 ID。");
         return;
@@ -109,11 +159,13 @@ export async function updateVideoView() {
     currentVideoId = targetVideoId;
 }
 
-export function createVideoShareLink() {
+export function createVideoShareLink(targetVideoId) {
+    if(!targetVideoId) targetVideoId = currentVideoId;
+
     let result = window.location.href.split("?")[0]
         + "?"
         + "module=videoView&videoId="
-        + encodeURIComponent(currentVideoId);
+        + encodeURIComponent(targetVideoId);
     return result;
 }
 

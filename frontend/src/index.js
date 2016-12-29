@@ -21,6 +21,7 @@ function initEventListeners() {
 
 async function updatePortalContent() {
     pageUtils.setElementInnerHtmlById("video-count", await videoManager.getVideoCount());
+    pageUtils.setElementInnerHtmlById("latest-videos", await videoManager.showLatestVideos());
 }
 
 function initGlobalExports() {
@@ -32,6 +33,7 @@ function initGlobalExports() {
     window.hideWarningBox = pageUtils.hideWarningBox;
     window.jumpToSsoLogin = jumpToSsoLogin;
     window.showVideoShareLink = videoManager.showVideoShareLink;
+    window.setCurrentVideoId = videoManager.setCurrentVideoId;
 }
 
 async function initPage() {

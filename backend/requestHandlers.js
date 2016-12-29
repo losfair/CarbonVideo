@@ -206,9 +206,37 @@ async function onGetVideoCount(req, resp) {
     }));
 }
 
+async function onGetLatestVideos(req, resp) {
+    let result = await verifyRequest(req, resp, [
+        {
+            "name": "count",
+            "type": "number"
+        }
+    ]);
+    if(!result) return;
+
+    let videos;
+    try {
+        videos = await videoManager.getLatestVideos(req.body.count);
+        if(!videos) throw "No videos";
+    } catch(e) {
+        resp.send(JSON.stringify({
+            "result": "failed",
+            "msg": "Unable to get latest videos"
+        }));
+        return;
+    }
+    resp.send(JSON.stringify({
+        "result": "success",
+        "msg": "OK",
+        "latestVideos": videos
+    }));
+}
+
 module.exports.onGetSsoUrl = onGetSsoUrl;
 module.exports.onUserAuthenticate = onUserAuthenticate;
 module.exports.onUserCheck = onUserCheck;
 module.exports.onNewVideo = onNewVideo;
 module.exports.onGetVideoInfo = onGetVideoInfo;
 module.exports.onGetVideoCount = onGetVideoCount;
+module.exports.onGetLatestVideos = onGetLatestVideos;

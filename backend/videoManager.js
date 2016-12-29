@@ -8,7 +8,8 @@ async function createVideo(username, title, url, desc) {
         "videoCreatedBy": username,
         "videoTitle": title,
         "videoUrl": url,
-        "videoDesc": desc
+        "videoDesc": desc,
+        "videoCreateTime": Date.now()
     };
     await resources.db.collection("videos").insertOne(videoInfo);
     return videoId;
@@ -28,7 +29,8 @@ async function getVideoInfo(id) {
         "videoCreatedBy": result.videoCreatedBy,
         "videoTitle": result.videoTitle,
         "videoUrl": result.videoUrl,
-        "videoDesc": result.videoDesc
+        "videoDesc": result.videoDesc,
+        "videoCreateTime": result.videoCreateTime
     };
 }
 
@@ -37,6 +39,34 @@ async function getVideoCount() {
     return count;
 }
 
+async function getLatestVideos(count) {
+    if(count < 1 || count > 10) return null;
+    let result = await resources.db.collection("videos")
+        .find({})
+        .sort({
+            "videoCreateTime": -1
+        })
+        .limit(count)
+        .toArray();
+    if(!result || !result.length) {
+        return null;
+    }
+
+    let ret = [];
+    result.forEach((v) => {
+        ret.push({
+            "videoId": v.videoId,
+            "videoCreatedBy": v.videoCreatedBy,
+            "videoTitle": v.videoTitle,
+            "videoUrl": v.videoUrl,
+            "videoDesc": v.videoDesc,
+            "videoCreateTime": v.videoCreateTime
+        });
+    });
+    return ret;
+}
+
 module.exports.createVideo = createVideo;
 module.exports.getVideoInfo = getVideoInfo;
 module.exports.getVideoCount = getVideoCount;
+module.exports.getLatestVideos = getLatestVideos;
