@@ -31,6 +31,7 @@ function initGlobalExports() {
     window.showWarningBox = pageUtils.showWarningBox;
     window.hideWarningBox = pageUtils.hideWarningBox;
     window.jumpToSsoLogin = jumpToSsoLogin;
+    window.showVideoShareLink = videoManager.showVideoShareLink;
 }
 
 async function initPage() {

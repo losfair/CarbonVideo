@@ -21,3 +21,13 @@
 #video-desc {
     margin-top: 20px;
 }
+
+#video-operations {
+    line-height: 36px;
+    font-size: 24px;
+}
+
+.video-operation-placeholder {
+    display: inline-block;
+    width: 10px;
+}

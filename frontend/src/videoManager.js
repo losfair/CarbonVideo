@@ -2,6 +2,8 @@ import * as pageUtils from "./pageUtils.js";
 import * as authUtils from "./authUtils.js";
 import * as network from "./network.js";
 
+let currentVideoId = "";
+
 async function createVideo(title, url, desc) {
     let token = authUtils.getSessionToken();
 
@@ -103,6 +105,20 @@ export async function updateVideoView() {
 
     let descElem = document.getElementById("video-desc");
     descElem.innerHTML = videoInfo.videoDesc;
+
+    currentVideoId = targetVideoId;
+}
+
+export function createVideoShareLink() {
+    let result = window.location.href.split("?")[0]
+        + "?"
+        + "module=videoView&videoId="
+        + encodeURIComponent(currentVideoId);
+    return result;
+}
+
+export function showVideoShareLink() {
+    pageUtils.showWarningBox("当前视频链接: " + createVideoShareLink());
 }
 
 export async function onCreateVideo() {
