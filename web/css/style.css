@@ -2,3 +2,22 @@
     text-align: center;
     margin-top: 20px;
 }
+
+.dropdown-menu-logged-in {
+    display: none;
+}
+
+#warning-box {
+    display: none;
+}
+
+#current-video {
+    margin-top: 10px;
+    width: 100%;
+    height: 200px;
+    background-color: black;
+}
+
+#video-desc {
+    margin-top: 20px;
+}

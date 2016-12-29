@@ -9,17 +9,60 @@ function onGetSsoUrl(req, resp) {
     resp.send(constants.SSO_URL);
 }
 
-async function onUserAuthenticate(req, resp) {
-    if(
-           !req.body
-        || !util.isString(req.body.ssoToken)
-    ) {
+async function verifyRequest(req, resp, args, requireAuth) {
+    let returnValueOnSuccess = true;
+
+    if(!req.body) {
         resp.send(JSON.stringify({
             "result": "failed",
             "msg": "Bad request"
         }));
-        return;
+        return false;
     }
+
+    if(requireAuth) {
+        args.push({
+            "name": "token",
+            "type": "string"
+        });
+    }
+
+    args.forEach((v) => {
+        if(
+               !req.body[v.name]
+            || (v.type && typeof(req.body[v.name]) != v.type)
+        ) {
+            resp.send(JSON.stringify({
+                "result": "failed",
+                "msg": "Invalid parameters"
+            }));
+            return false;
+        }
+    });
+
+    if(requireAuth) {
+        let result = await tokenManager.checkToken(req.body.token);
+        if(!result) {
+            resp.send(JSON.stringify({
+                "result": "failed",
+                "msg": "Not logged in"
+            }));
+            return false;
+        }
+        returnValueOnSuccess = result;
+    }
+
+    return returnValueOnSuccess;
+}
+
+async function onUserAuthenticate(req, resp) {
+    let result = await verifyRequest(req, resp, [
+        {
+            "name": "ssoToken",
+            "type": "string"
+        }
+    ]);
+    if(!result) return;
 
     let data;
     try {
@@ -70,66 +113,32 @@ async function onUserAuthenticate(req, resp) {
 }
 
 async function onUserCheck(req, resp) {
-    if(
-           !req.body
-        || !util.isString(req.body.token)
-    ) {
-        resp.send(JSON.stringify({
-            "result": "failed",
-            "msg": "Bad request"
-        }));
-        return;
-    }
-    let result;
-    try {
-        result = await tokenManager.checkToken(req.body.token);
-    } catch(e) {
-        resp.send(JSON.stringify({
-            "result": "failed",
-            "msg": "Unable to check token"
-        }));
-        return;
-    }
-    if(!result) {
-        resp.send(JSON.stringify({
-            "result": "failed",
-            "msg": "Not logged in",
-            "isLoggedIn": false
-        }));
-        return;
-    }
+    let username = await verifyRequest(req, resp, [], true);
+    if(!username) return;
 
     resp.send(JSON.stringify({
         "result": "success",
         "msg": "OK",
         "isLoggedIn": true,
-        "username": result
+        "username": username
     }));
 }
 
 async function onNewVideo(req, resp) {
-    if(
-           !req.body
-        || !util.isString(req.body.token)
-        || !util.isString(req.body.videoTitle)
-        || !util.isString(req.body.videoUrl)
-        || !util.isString(req.body.videoDesc)
-    ) {
-        resp.send(JSON.stringify({
-            "result": "failed",
-            "msg": "Bad request"
-        }));
-        return;
-    }
-    let result = await tokenManager.checkToken(req.body.token);
-    if(!result) {
-        resp.send(JSON.stringify({
-            "result": "failed",
-            "msg": "Not logged in"
-        }));
-        return;
-    }
-    let username = result;
+    let username = await verifyRequest(req, resp, [
+        {
+            "name": "videoTitle",
+            "type": "string"
+        }, {
+            "name": "videoUrl",
+            "type": "string"
+        }, {
+            "name": "videoDesc",
+            "type": "string"
+        }
+    ], true);
+    if(!username) return;
+
     let videoId;
     try {
         videoId = await videoManager.createVideo(username, req.body.videoTitle, req.body.videoUrl, req.body.videoDesc);
@@ -147,25 +156,39 @@ async function onNewVideo(req, resp) {
     }));
 }
 
+async function onGetVideoInfo(req, resp) {
+    let result = await verifyRequest(req, resp, [
+        {
+            "name": "videoId",
+            "type": "string"
+        }
+    ]);
+    if(!result) return;
+
+    let videoInfo;
+    try {
+        videoInfo = await videoManager.getVideoInfo(req.body.videoId);
+        if(!videoInfo) throw "No video info";
+    } catch(e) {
+        resp.send(JSON.stringify({
+            "result": "failed",
+            "msg": "Unable to get video info"
+        }));
+        return;
+    }
+
+    resp.send(JSON.stringify({
+        "result": "success",
+        "msg": "OK",
+        "videoInfo": videoInfo
+    }));
+}
+
 async function onGetVideoCount(req, resp) {
-    if(
-           !req.body
-        || !util.isString(req.body.token)
-    ) {
-        resp.send(JSON.stringify({
-            "result": "failed",
-            "msg": "Bad request"
-        }));
-        return;
-    }
-    let result = await tokenManager.checkToken(req.body.token);
-    if(!result) {
-        resp.send(JSON.stringify({
-            "result": "failed",
-            "msg": "Not logged in"
-        }));
-        return;
-    }
+    let result = await verifyRequest(req, resp, []);
+
+    if(!result) return;
+
     let videoCount;
     try {
         videoCount = await videoManager.getVideoCount();
@@ -187,4 +210,5 @@ module.exports.onGetSsoUrl = onGetSsoUrl;
 module.exports.onUserAuthenticate = onUserAuthenticate;
 module.exports.onUserCheck = onUserCheck;
 module.exports.onNewVideo = onNewVideo;
+module.exports.onGetVideoInfo = onGetVideoInfo;
 module.exports.onGetVideoCount = onGetVideoCount;
