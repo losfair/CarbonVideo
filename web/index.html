@@ -14,12 +14,12 @@
 </head>
 
 <body>
-	<nav class="navbar navbar-default" role="navigation">
+	<nav class="navbar navbar-default" id="top-navbar" role="navigation">
 		<div class="navbar-header">
 
 			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
 						 <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
-					</button> <a class="navbar-brand" href="#" onclick="loadPageModule('portal-page', 'portal.html')">学霸讲小题</a>
+					</button> <a class="navbar-brand" href="#" onclick="loadPageModule('portal')">学霸讲小题</a>
 		</div>
 
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -33,7 +33,7 @@
 							<a href="#" onclick="jumpToSsoLogin()">登录</a>
 						</li>
 						<li class="dropdown-menu-logged-in">
-							<a href="#" onclick="loadPageModule('admin-page', 'admin.html')">管理</a>
+							<a href="#" onclick="loadPageModule('admin')">管理</a>
 						</li>
 						<li class="dropdown-menu-logged-in">
 							<a href="#" id="logout-button">登出</a>

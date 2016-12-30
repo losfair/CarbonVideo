@@ -4,6 +4,7 @@ const resources = require("./resources.js");
 const constants = require("./constants.js");
 const tokenManager = require("./tokenManager.js");
 const videoManager = require("./videoManager.js");
+const commentManager = require("./commentManager.js");
 
 function onGetSsoUrl(req, resp) {
     resp.send(constants.SSO_URL);
@@ -233,6 +234,73 @@ async function onGetLatestVideos(req, resp) {
     }));
 }
 
+async function onCreateComment(req, resp) {
+    let username = await verifyRequest(req, resp, [
+        {
+            "name": "commentContent",
+            "type": "string"
+        }, {
+            "name": "parentType",
+            "type": "string"
+        }, {
+            "name": "parentId",
+            "type": "string"
+        }
+    ], true);
+    if(!username) return;
+
+    let commentId;
+    try {
+        commentId = await commentManager.createComment(
+            username,
+            req.body.parentType,
+            req.body.parentId,
+            req.body.commentContent
+        );
+        if(!commentId) throw "Failed";
+    } catch(e) {
+        resp.send(JSON.stringify({
+            "result": "failed",
+            "msg": "Unable to create comment"
+        }));
+        return;
+    }
+
+    resp.send(JSON.stringify({
+        "result": "success",
+        "msg": "OK",
+        "commentId": commentId
+    }));
+}
+
+async function onGetComments(req, resp) {
+    let result = await verifyRequest(req, resp, [
+        {
+            "name": "parentId",
+            "type": "string"
+        }
+    ]);
+    if(!result) return;
+
+    let comments;
+    try {
+        comments = await commentManager.getComments(req.body.parentId);
+        if(!comments) throw "Failed";
+    } catch(e) {
+        resp.send(JSON.stringify({
+            "result": "failed",
+            "msg": "Unable to get comments"
+        }));
+        return;
+    }
+
+    resp.send(JSON.stringify({
+        "result": "success",
+        "msg": "OK",
+        "comments": comments
+    }));
+}
+
 module.exports.onGetSsoUrl = onGetSsoUrl;
 module.exports.onUserAuthenticate = onUserAuthenticate;
 module.exports.onUserCheck = onUserCheck;
@@ -240,3 +308,5 @@ module.exports.onNewVideo = onNewVideo;
 module.exports.onGetVideoInfo = onGetVideoInfo;
 module.exports.onGetVideoCount = onGetVideoCount;
 module.exports.onGetLatestVideos = onGetLatestVideos;
+module.exports.onCreateComment = onCreateComment;
+module.exports.onGetComments = onGetComments;

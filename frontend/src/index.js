@@ -29,6 +29,7 @@ function initGlobalExports() {
     window.onCreateVideo = videoManager.onCreateVideo;
     window.updatePortalContent = updatePortalContent;
     window.updateVideoView = videoManager.updateVideoView;
+    window.onCreateComment = videoManager.onCreateComment;
     window.showWarningBox = pageUtils.showWarningBox;
     window.hideWarningBox = pageUtils.hideWarningBox;
     window.jumpToSsoLogin = jumpToSsoLogin;
@@ -62,14 +63,13 @@ async function initPage() {
     }
 
     if(pageUtils.getParameterByName("module")) {
-        let targetModuleUrl = getPageModuleUrl(pageUtils.getParameterByName("module"));
-        if(targetModuleUrl) {
-            pageUtils.loadPageModule(null, targetModuleUrl);
+        let targetModuleName = pageUtils.getParameterByName("module");
+        if(await pageUtils.loadPageModule(targetModuleName)) {
             return;
         }
     }
 
-    pageUtils.loadPageModule("portal-page", "portal.html");
+    pageUtils.loadPageModule("portal");
 }
 
 if(document.body) {

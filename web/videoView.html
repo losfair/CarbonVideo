@@ -1,11 +1,27 @@
 <h2 id="video-title"></h2>
+<p>创建者: <span id="video-created-by"></span></p>
 <video id="current-video" controls></video>
 <div id="video-operations">
+    <i class="fa fa-thumbs-up video-operation-icon" aria-hidden="true"></i>
+    <div class="video-operation-placeholder"></div>
     <i class="fa fa-plus video-operation-icon" aria-hidden="true"></i>
     <div class="video-operation-placeholder"></div>
     <i class="fa fa-share-alt video-operation-icon" aria-hidden="true" onclick="showVideoShareLink()"></i>
 </div>
 <p id="video-desc"></p>
+
+<form role="form" action="javascript:;">
+    <div class="form-group">
+        <label for="newCommentContent">
+						写评论
+					</label>
+        <textarea class="form-control" id="newCommentContent" rows="10"></textarea>
+    </div>
+    <button class="btn btn-default" onclick="onCreateComment()">
+					发布
+				</button>
+</form><br>
+<div id="video-comments"></div>
 
 <script>
     updateVideoView();

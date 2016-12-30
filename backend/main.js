@@ -16,6 +16,8 @@ app.post("/video/new", requestHandlers.onNewVideo);
 app.post("/video/info", requestHandlers.onGetVideoInfo);
 app.post("/video/count", requestHandlers.onGetVideoCount);
 app.post("/video/latest", requestHandlers.onGetLatestVideos);
+app.post("/comment/new", requestHandlers.onCreateComment);
+app.post("/comment/get", requestHandlers.onGetComments);
 
 async function run() {
     await resources.init();

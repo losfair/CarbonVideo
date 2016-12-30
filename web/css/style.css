@@ -31,3 +31,10 @@
     display: inline-block;
     width: 10px;
 }
+
+.video-comment {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 5px;
+    border-bottom: 1px solid #7F7F7F;
+}

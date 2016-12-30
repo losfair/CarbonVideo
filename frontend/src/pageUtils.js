@@ -1,4 +1,5 @@
 import * as network from "./network.js";
+import {getPageModuleUrl} from "./pageModules.js";
 
 let pageModuleCache = {};
 
@@ -43,7 +44,6 @@ export function showElementsByClassName(cn, displayStyle) {
     }
 }
 
-
 export function hideWarningBox() {
     let boxElem = document.getElementById("warning-box");
     if(!boxElem) return;
@@ -66,14 +66,17 @@ export function showWarningBox(content) {
     boxElem.style.display = "block";
 }
 
-export async function loadPageModule(elem, url) {
+export async function loadPageModule(moduleName) {
+    let url = getPageModuleUrl(moduleName);
+    if(!url) return;
+
     let allModules = document.getElementsByClassName("page-module");
     for(let i = 0; i < allModules.length; i++) {
         let m = allModules[i];
         m.style.display = "none";
         m.innerHTML = "";
     }
-    elem = document.getElementById("current-module");
+    let elem = document.getElementById("current-module");
     if(!elem) return;
 
     let pageModuleContent = "";
@@ -99,4 +102,8 @@ export async function loadPageModule(elem, url) {
     }
 
     elem.style.display = "block";
+
+    hideWarningBox();
+
+    return true;
 }
