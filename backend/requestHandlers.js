@@ -28,18 +28,22 @@ async function verifyRequest(req, resp, args, requireAuth) {
         });
     }
 
-    args.forEach((v) => {
-        if (
-            !req.body[v.name]
-            || (v.type && typeof (req.body[v.name]) != v.type)
-        ) {
-            resp.send(JSON.stringify({
-                "result": "failed",
-                "msg": "Invalid parameters"
-            }));
-            return false;
-        }
-    });
+    try {
+        args.forEach((v) => {
+            if (
+                !req.body[v.name]
+                || (v.type && typeof (req.body[v.name]) != v.type)
+            ) {
+                throw "Invalid parameters";
+            }
+        });
+    } catch(e) {
+        resp.send(JSON.stringify({
+            "result": "failed",
+            "msg": e.toString()
+        }));
+        return false;
+    }
 
     if (requireAuth) {
         let result = await tokenManager.checkToken(req.body.token);
