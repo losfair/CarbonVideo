@@ -37,6 +37,20 @@ function initGlobalExports() {
     window.setCurrentVideoId = videoManager.setCurrentVideoId;
 }
 
+function initUserStyles(isAdmin) {
+    let cssElem = document.createElement("link");
+    cssElem.rel="stylesheet";
+    cssElem.href = "css/user-style.css";
+    document.head.appendChild(cssElem);
+
+    if(isAdmin) {
+        cssElem = document.createElement("link");
+        cssElem.rel="stylesheet";
+        cssElem.href = "css/admin-style.css";
+        document.head.appendChild(cssElem);
+    }
+}
+
 async function initPage() {
     initEventListeners();
     initGlobalExports();
@@ -57,6 +71,7 @@ async function initPage() {
 
     let result = await authUtils.checkUserLoginStatus();
     if(result) {
+        initUserStyles(authUtils.userIsAdmin());
         pageUtils.setElementInnerHtmlById("current-username-navbar", authUtils.getUsername());
         pageUtils.hideElementsByClassName("dropdown-menu-not-logged-in");
         pageUtils.showElementsByClassName("dropdown-menu-logged-in");

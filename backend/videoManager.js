@@ -1,13 +1,22 @@
 const resources = require("./resources.js");
 const uuid = require("uuid");
+const fileManager = require("./fileManager.js");
 
-async function createVideo(username, title, url, desc) {
+async function createVideo(username, title, key, desc) {
+    if(resources.adminUserList.indexOf(username) < 0) {
+        return null;
+    }
+
+    if(!fileManager.validateKey(key)) {
+        return null;
+    }
+
     let videoId = uuid.v4();
     let videoInfo = {
         "videoId": videoId,
         "videoCreatedBy": username,
         "videoTitle": title,
-        "videoUrl": url,
+        "videoKey": key,
         "videoDesc": desc,
         "videoCreateTime": Date.now()
     };
@@ -25,10 +34,18 @@ async function getVideoInfo(id) {
     }
 
     result = result[0];
+
+    let videoUrl = "";
+    let videoKey = result.videoKey;
+    if(!videoKey) videoUrl = result.videoUrl;
+    else {
+        videoUrl = fileManager.getDownloadUrl(videoKey);
+    }
+
     return {
         "videoCreatedBy": result.videoCreatedBy,
         "videoTitle": result.videoTitle,
-        "videoUrl": result.videoUrl,
+        "videoUrl": videoUrl,
         "videoDesc": result.videoDesc,
         "videoCreateTime": result.videoCreateTime
     };
@@ -58,8 +75,6 @@ async function getLatestVideos(count) {
             "videoId": v.videoId,
             "videoCreatedBy": v.videoCreatedBy,
             "videoTitle": v.videoTitle,
-            "videoUrl": v.videoUrl,
-            "videoDesc": v.videoDesc,
             "videoCreateTime": v.videoCreateTime
         });
     });

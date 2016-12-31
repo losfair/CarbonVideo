@@ -117,11 +117,15 @@ async function onUserCheck(req, resp) {
     let username = await verifyRequest(req, resp, [], true);
     if(!username) return;
 
+    let isAdmin = false;
+    if(resources.adminUserList.indexOf(username) >= 0) isAdmin = true;
+
     resp.send(JSON.stringify({
         "result": "success",
         "msg": "OK",
         "isLoggedIn": true,
-        "username": username
+        "username": username,
+        "isAdmin": isAdmin
     }));
 }
 
@@ -131,7 +135,7 @@ async function onNewVideo(req, resp) {
             "name": "videoTitle",
             "type": "string"
         }, {
-            "name": "videoUrl",
+            "name": "videoKey",
             "type": "string"
         }, {
             "name": "videoDesc",
@@ -142,7 +146,7 @@ async function onNewVideo(req, resp) {
 
     let videoId;
     try {
-        videoId = await videoManager.createVideo(username, req.body.videoTitle, req.body.videoUrl, req.body.videoDesc);
+        videoId = await videoManager.createVideo(username, req.body.videoTitle, req.body.videoKey, req.body.videoDesc);
     } catch(e) {
         resp.send(JSON.stringify({
             "result": "failed",

@@ -3,6 +3,7 @@ import * as network from "./network.js";
 let sessionToken = "";
 let ssoUrl = "";
 let username = "";
+let isAdmin = false;
 
 export async function checkUserLoginStatus() {
     if(!sessionToken) return false;
@@ -24,6 +25,7 @@ export async function checkUserLoginStatus() {
     }
     if(resp.isLoggedIn) {
         username = resp.username;
+        isAdmin = resp.isAdmin;
         return true;
     }
     else return false;
@@ -64,6 +66,10 @@ export async function getSsoUrl() {
 
 export function getUsername() {
     return username;
+}
+
+export function userIsAdmin() {
+    return isAdmin;
 }
 
 export function getSessionToken() {

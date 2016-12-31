@@ -5,7 +5,7 @@ import * as stringUtils from "./stringUtils.js";
 
 let currentVideoId = "";
 
-async function createVideo(title, url, desc) {
+async function createVideo(title, key, desc) {
     let token = authUtils.getSessionToken();
 
     let result = await network.makeRequest(
@@ -14,7 +14,7 @@ async function createVideo(title, url, desc) {
         JSON.stringify({
             "token": token,
             "videoTitle": title,
-            "videoUrl": url,
+            "videoKey": key,
             "videoDesc": desc
         }), {
             "Content-Type": "application/json"
@@ -270,9 +270,9 @@ export function showVideoShareLink() {
 
 export async function onCreateVideo() {
     let title = document.getElementById("videoTitle").value;
-    let url = document.getElementById("videoUrl").value;
+    let key = document.getElementById("videoKey").value;
     let desc = document.getElementById("videoDesc").value;
-    let result = await createVideo(title, url, desc);
+    let result = await createVideo(title, key, desc);
     if(!result) {
         pageUtils.showWarningBox("视频创建失败。");
     } else {
