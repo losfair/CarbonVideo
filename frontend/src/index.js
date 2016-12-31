@@ -21,6 +21,7 @@ function initEventListeners() {
 
 async function updatePortalContent() {
     pageUtils.setElementInnerHtmlById("video-count", await videoManager.getVideoCount());
+    pageUtils.setElementInnerHtmlById("comment-count", await videoManager.getCommentCount());
     pageUtils.setElementInnerHtmlById("latest-videos", await videoManager.showLatestVideos());
 }
 

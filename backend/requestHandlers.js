@@ -163,6 +163,22 @@ async function onGetCommentCount(args) {
     };
 }
 
+async function onCreateVideoLike(args, username) {
+    let result = await videoManager.createVideoLike(username, args.videoId);
+    if(!result) throw "Unable to create video like";
+    return {
+        "likeCount": result
+    };
+}
+
+async function onGetVideoLikeCount(args) {
+    let result = await videoManager.getVideoLikeCount(args.videoId);
+    if(!result && result !== 0) throw "Unable to get video like count";
+    return {
+        "likeCount": result
+    };
+}
+
 const handlers = {
     "userAuthenticate": {
         "requireAuth": false,
@@ -250,6 +266,26 @@ const handlers = {
         "requireAuth": false,
         "func": onGetCommentCount,
         "args": []
+    },
+    "createVideoLike": {
+        "requireAuth": true,
+        "func": onCreateVideoLike,
+        "args": [
+            {
+                "name": "videoId",
+                "type": "string"
+            }
+        ]
+    },
+    "getVideoLikeCount": {
+        "requireAuth": false,
+        "func": onGetVideoLikeCount,
+        "args": [
+            {
+                "name": "videoId",
+                "type": "string"
+            }
+        ]
     }
 };
 

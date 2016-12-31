@@ -81,7 +81,77 @@ async function getLatestVideos(count) {
     return ret;
 }
 
+async function createVideoLike(username, id) {
+    let currentVideo = await resources.db.collection("videos")
+        .find({
+            "videoId": id
+        })
+        .limit(1)
+        .toArray();
+    
+    if(!currentVideo || !currentVideo.length) {
+        return null;
+    }
+
+    currentVideo = currentVideo[0];
+
+    let currentLikeCount = currentVideo.likeCount;
+    if(!currentLikeCount) currentLikeCount = 0;
+
+    let result = await resources.db.collection("likes")
+        .find({
+            "username": username,
+            "parentId": id
+        })
+        .limit(1)
+        .toArray();
+
+    if(result && result.length) {
+        return null;
+    }
+
+    let likeId = uuid.v4();
+
+    await resources.db.collection("likes")
+        .insert({
+            "likeId": likeId,
+            "username": username,
+            "parentId": id
+        });
+    
+    await resources.db.collection("videos")
+        .update({
+            "_id": currentVideo._id
+        }, {
+            "$set": {
+                "likeCount": currentLikeCount + 1
+            }
+        });
+    
+    return currentLikeCount + 1;
+}
+
+async function getVideoLikeCount(id) {
+    let currentVideo = await resources.db.collection("videos")
+        .find({
+            "videoId": id
+        })
+        .limit(1)
+        .toArray();
+    
+    if(!currentVideo || !currentVideo.length) return null;
+
+    currentVideo = currentVideo[0];
+
+    let currentLikeCount = currentVideo.likeCount;
+    if(!currentLikeCount) currentLikeCount = 0;
+
+    return currentLikeCount;
+}
+
 module.exports.createVideo = createVideo;
 module.exports.getVideoInfo = getVideoInfo;
 module.exports.getVideoCount = getVideoCount;
 module.exports.getLatestVideos = getLatestVideos;
+module.exports.createVideoLike = createVideoLike;
+module.exports.getVideoLikeCount = getVideoLikeCount;

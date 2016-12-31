@@ -16,6 +16,8 @@ app.post("/video/new", requestHandlers.onRequest("newVideo"));
 app.post("/video/info", requestHandlers.onRequest("getVideoInfo"));
 app.post("/video/count", requestHandlers.onRequest("getVideoCount"));
 app.post("/video/latest", requestHandlers.onRequest("getLatestVideos"));
+app.post("/video/like/new", requestHandlers.onRequest("createVideoLike"));
+app.post("/video/like/count", requestHandlers.onRequest("getVideoLikeCount"));
 app.post("/comment/new", requestHandlers.onRequest("createComment"));
 app.post("/comment/get", requestHandlers.onRequest("getComments"));
 app.post("/comment/count", requestHandlers.onRequest("getCommentCount"));

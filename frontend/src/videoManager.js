@@ -170,6 +170,86 @@ async function getVideoComments(id) {
     return result.comments;
 }
 
+export async function getCommentCount() {
+    let token = authUtils.getSessionToken();
+
+    let result = await network.makeRequest(
+        "POST",
+        "/comment/count",
+        JSON.stringify({
+            "token": token
+        }), {
+            "Content-Type": "application/json"
+        }
+    );
+    if(!result) return null;
+    try {
+        result = JSON.parse(result);
+    } catch(e) {
+        return null;
+    }
+
+    if(result.result != "success") {
+        return null;
+    }
+
+    return result.commentCount;
+}
+
+export async function createVideoLike(id) {
+    let token = authUtils.getSessionToken();
+
+    let result = await network.makeRequest(
+        "POST",
+        "/video/like/new",
+        JSON.stringify({
+            "token": token,
+            "videoId": id
+        }), {
+            "Content-Type": "application/json"
+        }
+    );
+    if(!result) return null;
+    try {
+        result = JSON.parse(result);
+    } catch(e) {
+        return null;
+    }
+
+    if(result.result != "success") {
+        return null;
+    }
+
+    return result.likeCount;
+}
+
+export async function getVideoLikeCount(id) {
+    let token = authUtils.getSessionToken();
+
+    let result = await network.makeRequest(
+        "POST",
+        "/video/like/count",
+        JSON.stringify({
+            "token": token,
+            "videoId": id
+        }), {
+            "Content-Type": "application/json"
+        }
+    );
+    if(!result) return null;
+    try {
+        result = JSON.parse(result);
+    } catch(e) {
+        return null;
+    }
+
+    if(result.result != "success") {
+        return null;
+    }
+
+    return result.likeCount;
+}
+
 export function setCurrentVideoId(id) {
     currentVideoId = id;
 }
@@ -245,6 +325,18 @@ export async function updateVideoView(targetVideoId) {
 
     let contentElem = document.getElementById("current-video");
     contentElem.src = videoInfo.videoUrl;
+
+    let likeButtonElem = document.getElementById("video-like-button");
+    likeButtonElem.targetVideoId = targetVideoId;
+    likeButtonElem.addEventListener("click", async function (e) {
+        let newLikeCount = await createVideoLike(e.target.targetVideoId);
+        if(newLikeCount) {
+            document.getElementById("video-like-count").innerHTML = newLikeCount;
+        }
+    });
+
+    let likeCountElem = document.getElementById("video-like-count");
+    likeCountElem.innerHTML = await getVideoLikeCount(targetVideoId);
 
     let descElem = document.getElementById("video-desc");
     descElem.innerHTML = stringUtils.escapeStringForHtml(videoInfo.videoDesc);
