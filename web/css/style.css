@@ -4,6 +4,10 @@
     margin-bottom: 20px;
 }
 
+.dropdown-menu-not-logged-in {
+    display: block;
+}
+
 .dropdown-menu-logged-in {
     display: none;
 }

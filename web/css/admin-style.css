@@ -67,3 +67,7 @@
     background-color: #c0392b;
   }
 }
+
+.dropdown-menu-admin {
+    display: block;
+}

@@ -65,5 +65,11 @@ async function getComments(parentId) {
     return ret;
 }
 
+async function getCommentCount() {
+    let count = await resources.db.collection("comments").count();
+    return count;
+}
+
 module.exports.createComment = createComment;
 module.exports.getComments = getComments;
+module.exports.getCommentCount = getCommentCount;

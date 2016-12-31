@@ -13,7 +13,7 @@ function onGetSsoUrl(req, resp) {
 async function verifyRequest(req, resp, args, requireAuth) {
     let returnValueOnSuccess = true;
 
-    if(!req.body) {
+    if (!req.body) {
         resp.send(JSON.stringify({
             "result": "failed",
             "msg": "Bad request"
@@ -21,7 +21,7 @@ async function verifyRequest(req, resp, args, requireAuth) {
         return false;
     }
 
-    if(requireAuth) {
+    if (requireAuth) {
         args.push({
             "name": "token",
             "type": "string"
@@ -29,9 +29,9 @@ async function verifyRequest(req, resp, args, requireAuth) {
     }
 
     args.forEach((v) => {
-        if(
-               !req.body[v.name]
-            || (v.type && typeof(req.body[v.name]) != v.type)
+        if (
+            !req.body[v.name]
+            || (v.type && typeof (req.body[v.name]) != v.type)
         ) {
             resp.send(JSON.stringify({
                 "result": "failed",
@@ -41,9 +41,9 @@ async function verifyRequest(req, resp, args, requireAuth) {
         }
     });
 
-    if(requireAuth) {
+    if (requireAuth) {
         let result = await tokenManager.checkToken(req.body.token);
-        if(!result) {
+        if (!result) {
             resp.send(JSON.stringify({
                 "result": "failed",
                 "msg": "Not logged in"
@@ -56,261 +56,242 @@ async function verifyRequest(req, resp, args, requireAuth) {
     return returnValueOnSuccess;
 }
 
-async function onUserAuthenticate(req, resp) {
-    let result = await verifyRequest(req, resp, [
+async function onUserAuthenticate(args) {
+    let data = await rp.post(
+        constants.SSO_URL + "identity/verify/verify_client_token",
         {
-            "name": "ssoToken",
-            "type": "string"
-        }
-    ]);
-    if(!result) return;
-
-    let data;
-    try {
-        data = await rp.post(
-            constants.SSO_URL + "identity/verify/verify_client_token",
-            {
-                "form": {
-                    "client_token": req.body.ssoToken
-                }
+            "form": {
+                "client_token": args.ssoToken
             }
-        );
-        data = JSON.parse(data);
-    } catch(e) {
-        resp.send(JSON.stringify({
-            "result": "failed",
-            "msg": "Server request failed"
-        }));
-        return;
-    }
-    if(
-           !data
+        }
+    );
+    data = JSON.parse(data);
+
+    if (
+        !data
         || data.err !== 0
         || !data.username
         || !util.isString(data.username)
         || (constants.DOMAIN && (!data.domain || data.domain != constants.DOMAIN))
     ) {
-        resp.send(JSON.stringify({
-            "result": "failed",
-            "msg": "Authentication failed"
-        }));
-        return;
+        throw "Authentication failed";
     }
-    let newToken;
-    try {
-        newToken = await tokenManager.createToken(data.username);
-    } catch(e) {
-        resp.send(JSON.stringify({
-            "result": "failed",
-            "msg": "Unable to create token"
-        }));
-        return;
-    }
-    resp.send(JSON.stringify({
-        "result": "success",
-        "msg": "OK",
+
+    let newToken = await tokenManager.createToken(data.username);
+    return {
         "token": newToken
-    }));
+    };
 }
 
-async function onUserCheck(req, resp) {
-    let username = await verifyRequest(req, resp, [], true);
-    if(!username) return;
-
+async function onUserCheck(args, username) {
     let isAdmin = false;
-    if(resources.adminUserList.indexOf(username) >= 0) isAdmin = true;
+    if (resources.adminUserList.indexOf(username) >= 0) isAdmin = true;
 
-    resp.send(JSON.stringify({
-        "result": "success",
-        "msg": "OK",
+    return {
         "isLoggedIn": true,
         "username": username,
         "isAdmin": isAdmin
-    }));
+    }
 }
 
-async function onNewVideo(req, resp) {
-    let username = await verifyRequest(req, resp, [
-        {
-            "name": "videoTitle",
-            "type": "string"
-        }, {
-            "name": "videoKey",
-            "type": "string"
-        }, {
-            "name": "videoDesc",
-            "type": "string"
-        }
-    ], true);
-    if(!username) return;
-
+async function onNewVideo(args, username) {
     let videoId;
-    try {
-        videoId = await videoManager.createVideo(username, req.body.videoTitle, req.body.videoKey, req.body.videoDesc);
-    } catch(e) {
-        resp.send(JSON.stringify({
-            "result": "failed",
-            "msg": "Unable to create video"
-        }));
-        return;
-    }
-    resp.send(JSON.stringify({
-        "result": "success",
-        "msg": "OK",
+    videoId = await videoManager.createVideo(username, args.videoTitle, args.videoKey, args.videoDesc);
+
+    return {
         "videoId": videoId
-    }));
+    };
 }
 
-async function onGetVideoInfo(req, resp) {
-    let result = await verifyRequest(req, resp, [
-        {
-            "name": "videoId",
-            "type": "string"
-        }
-    ]);
-    if(!result) return;
+async function onGetVideoInfo(args) {
+    let videoInfo = await videoManager.getVideoInfo(args.videoId);
+    if (!videoInfo) throw "No video info";
 
-    let videoInfo;
-    try {
-        videoInfo = await videoManager.getVideoInfo(req.body.videoId);
-        if(!videoInfo) throw "No video info";
-    } catch(e) {
-        resp.send(JSON.stringify({
-            "result": "failed",
-            "msg": "Unable to get video info"
-        }));
-        return;
-    }
-
-    resp.send(JSON.stringify({
-        "result": "success",
-        "msg": "OK",
+    return {
         "videoInfo": videoInfo
-    }));
+    };
 }
 
-async function onGetVideoCount(req, resp) {
-    let result = await verifyRequest(req, resp, []);
-
-    if(!result) return;
-
-    let videoCount;
-    try {
-        videoCount = await videoManager.getVideoCount();
-    } catch(e) {
-        resp.send(JSON.stringify({
-            "result": "failed",
-            "msg": "Unable to get video count"
-        }));
-        return;
-    }
-    resp.send(JSON.stringify({
-        "result": "success",
-        "msg": "OK",
+async function onGetVideoCount(args) {
+    let videoCount = await videoManager.getVideoCount();
+    return {
         "videoCount": videoCount
-    }));
+    };
 }
 
-async function onGetLatestVideos(req, resp) {
-    let result = await verifyRequest(req, resp, [
-        {
-            "name": "count",
-            "type": "number"
-        }
-    ]);
-    if(!result) return;
+async function onGetLatestVideos(args) {
+    let videos = await videoManager.getLatestVideos(args.count);
+    if (!videos) throw "No videos";
 
-    let videos;
-    try {
-        videos = await videoManager.getLatestVideos(req.body.count);
-        if(!videos) throw "No videos";
-    } catch(e) {
-        resp.send(JSON.stringify({
-            "result": "failed",
-            "msg": "Unable to get latest videos"
-        }));
-        return;
-    }
-    resp.send(JSON.stringify({
-        "result": "success",
-        "msg": "OK",
+    return {
         "latestVideos": videos
-    }));
+    };
 }
 
-async function onCreateComment(req, resp) {
-    let username = await verifyRequest(req, resp, [
-        {
-            "name": "commentContent",
-            "type": "string"
-        }, {
-            "name": "parentType",
-            "type": "string"
-        }, {
-            "name": "parentId",
-            "type": "string"
-        }
-    ], true);
-    if(!username) return;
+async function onCreateComment(args, username) {
+    let commentId = await commentManager.createComment(
+        username,
+        args.parentType,
+        args.parentId,
+        args.commentContent
+    );
+    if (!commentId) throw "Comment creation failed";
 
-    let commentId;
-    try {
-        commentId = await commentManager.createComment(
-            username,
-            req.body.parentType,
-            req.body.parentId,
-            req.body.commentContent
-        );
-        if(!commentId) throw "Failed";
-    } catch(e) {
-        resp.send(JSON.stringify({
-            "result": "failed",
-            "msg": "Unable to create comment"
-        }));
-        return;
-    }
-
-    resp.send(JSON.stringify({
-        "result": "success",
-        "msg": "OK",
+    return {
         "commentId": commentId
-    }));
+    };
 }
 
-async function onGetComments(req, resp) {
-    let result = await verifyRequest(req, resp, [
-        {
-            "name": "parentId",
-            "type": "string"
-        }
-    ]);
-    if(!result) return;
+async function onGetComments(args) {
+    let comments = await commentManager.getComments(args.parentId);
+    if (!comments) throw "Unable to get comments";
 
-    let comments;
-    try {
-        comments = await commentManager.getComments(req.body.parentId);
-        if(!comments) throw "Failed";
-    } catch(e) {
-        resp.send(JSON.stringify({
-            "result": "failed",
-            "msg": "Unable to get comments"
-        }));
-        return;
-    }
-
-    resp.send(JSON.stringify({
-        "result": "success",
-        "msg": "OK",
+    return {
         "comments": comments
-    }));
+    };
+}
+
+async function onGetCommentCount(args) {
+    let commentCount = await commentManager.getCommentCount();
+
+    return {
+        "commentCount": commentCount
+    };
+}
+
+const handlers = {
+    "userAuthenticate": {
+        "requireAuth": false,
+        "func": onUserAuthenticate,
+        "args": [
+            {
+                "name": "ssoToken",
+                "type": "string"
+            }
+        ]
+    },
+    "userCheck": {
+        "requireAuth": true,
+        "func": onUserCheck,
+        "args": []
+    },
+    "newVideo": {
+        "requireAuth": true,
+        "func": onNewVideo,
+        "args": [
+            {
+                "name": "videoTitle",
+                "type": "string"
+            }, {
+                "name": "videoKey",
+                "type": "string"
+            }, {
+                "name": "videoDesc",
+                "type": "string"
+            }
+        ]
+    },
+    "getVideoInfo": {
+        "requireAuth": false,
+        "func": onGetVideoInfo,
+        "args": [
+            {
+                "name": "videoId",
+                "type": "string"
+            }
+        ]
+    },
+    "getVideoCount": {
+        "requireAuth": false,
+        "func": onGetVideoCount,
+        "args": []
+    },
+    "getLatestVideos": {
+        "requireAuth": false,
+        "func": onGetLatestVideos,
+        "args": [
+            {
+                "name": "count",
+                "type": "number"
+            }
+        ]
+    },
+    "createComment": {
+        "requireAuth": true,
+        "func": onCreateComment,
+        "args": [
+            {
+                "name": "commentContent",
+                "type": "string"
+            }, {
+                "name": "parentType",
+                "type": "string"
+            }, {
+                "name": "parentId",
+                "type": "string"
+            }
+        ]
+    },
+    "getComments": {
+        "requireAuth": false,
+        "func": onGetComments,
+        "args": [
+            {
+                "name": "parentId",
+                "type": "string"
+            }
+        ]
+    },
+    "getCommentCount": {
+        "requireAuth": false,
+        "func": onGetCommentCount,
+        "args": []
+    }
+};
+
+function onRequest(handlerName) {
+    let targetHandler = handlers[handlerName];
+    if (!targetHandler) throw "Handler not found: " + handlerName;
+
+    return async function (req, resp) {
+        let result = await verifyRequest(
+            req,
+            resp,
+            targetHandler.args,
+            targetHandler.requireAuth
+        );
+        if (!result) return;
+
+        let username = "";
+        if(targetHandler.requireAuth) username = result;
+
+        try {
+            result = await targetHandler.func(req.body, username);
+            if(!result) throw "Empty response from target handler";
+        } catch(e) {
+            resp.send(JSON.stringify({
+                "result": "failed",
+                "msg": e.toString()
+            }));
+            return;
+        }
+
+        try {
+            if(!util.isObject(result)) throw "Response is not an object";
+        } catch(e) {
+            resp.send(JSON.stringify({
+                "result": "failed",
+                "msg": "Bad response type from target handler"
+            }));
+            return;
+        }
+
+        result.result = "success";
+        result.msg = "OK";
+
+        resp.send(JSON.stringify(result));
+    }
 }
 
 module.exports.onGetSsoUrl = onGetSsoUrl;
-module.exports.onUserAuthenticate = onUserAuthenticate;
-module.exports.onUserCheck = onUserCheck;
-module.exports.onNewVideo = onNewVideo;
-module.exports.onGetVideoInfo = onGetVideoInfo;
-module.exports.onGetVideoCount = onGetVideoCount;
-module.exports.onGetLatestVideos = onGetLatestVideos;
-module.exports.onCreateComment = onCreateComment;
-module.exports.onGetComments = onGetComments;
+module.exports.onRequest = onRequest;

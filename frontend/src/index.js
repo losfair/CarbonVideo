@@ -73,8 +73,6 @@ async function initPage() {
     if(result) {
         initUserStyles(authUtils.userIsAdmin());
         pageUtils.setElementInnerHtmlById("current-username-navbar", authUtils.getUsername());
-        pageUtils.hideElementsByClassName("dropdown-menu-not-logged-in");
-        pageUtils.showElementsByClassName("dropdown-menu-logged-in");
     }
 
     if(pageUtils.getParameterByName("module")) {

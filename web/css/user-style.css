@@ -67,3 +67,15 @@
     background-color: #8e44ad;
   }
 }
+
+.dropdown-menu-not-logged-in {
+    display: none;
+}
+
+.dropdown-menu-logged-in {
+    display: block;
+}
+
+.dropdown-menu-admin {
+    display: none;
+}

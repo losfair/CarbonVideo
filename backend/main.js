@@ -10,14 +10,15 @@ app.use(express.static("../web"));
 app.use(bodyParser.json());
 
 app.post("/config/sso_url", requestHandlers.onGetSsoUrl);
-app.post("/user/authenticate", requestHandlers.onUserAuthenticate);
-app.post("/user/check", requestHandlers.onUserCheck);
-app.post("/video/new", requestHandlers.onNewVideo);
-app.post("/video/info", requestHandlers.onGetVideoInfo);
-app.post("/video/count", requestHandlers.onGetVideoCount);
-app.post("/video/latest", requestHandlers.onGetLatestVideos);
-app.post("/comment/new", requestHandlers.onCreateComment);
-app.post("/comment/get", requestHandlers.onGetComments);
+app.post("/user/authenticate", requestHandlers.onRequest("userAuthenticate"));
+app.post("/user/check", requestHandlers.onRequest("userCheck"));
+app.post("/video/new", requestHandlers.onRequest("newVideo"));
+app.post("/video/info", requestHandlers.onRequest("getVideoInfo"));
+app.post("/video/count", requestHandlers.onRequest("getVideoCount"));
+app.post("/video/latest", requestHandlers.onRequest("getLatestVideos"));
+app.post("/comment/new", requestHandlers.onRequest("createComment"));
+app.post("/comment/get", requestHandlers.onRequest("getComments"));
+app.post("/comment/count", requestHandlers.onRequest("getCommentCount"));
 
 async function run() {
     await resources.init();
