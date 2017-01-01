@@ -3,33 +3,20 @@ import ReactDOM from "react-dom";
 
 import * as pageUtils from "../pageUtils.js";
 import * as authUtils from "../authUtils.js";
-import * as network from "../network.js";
 import * as stringUtils from "../stringUtils.js";
 import * as videoManager from "../videoManager.js";
+import * as api from "../api.js";
 
 async function createVideoComment(videoId, content) {
     let token = authUtils.getSessionToken();
 
-    let result = await network.makeRequest(
-        "POST",
-        "/comment/new",
-        JSON.stringify({
-            "token": token,
-            "commentContent": content,
-            "parentType": "video",
-            "parentId": videoId
-        }), {
-            "Content-Type": "application/json"
-        }
-    );
-    if(!result) return false;
-    try {
-        result = JSON.parse(result);
-    } catch(e) {
-        return false;
-    }
-
-    if(result.result != "success") {
+    let result = await api.request("/comment/new", {
+        "token": token,
+        "commentContent": content,
+        "parentType": "video",
+        "parentId": videoId
+    });
+    if(!result || result.result != "success") {
         return false;
     }
 
@@ -37,26 +24,10 @@ async function createVideoComment(videoId, content) {
 }
 
 async function getVideoComments(id) {
-    let token = authUtils.getSessionToken();
-
-    let result = await network.makeRequest(
-        "POST",
-        "/comment/get",
-        JSON.stringify({
-            "token": token,
-            "parentId": id
-        }), {
-            "Content-Type": "application/json"
-        }
-    );
-    if(!result) return null;
-    try {
-        result = JSON.parse(result);
-    } catch(e) {
-        return null;
-    }
-
-    if(result.result != "success") {
+let result = await api.request("/comment/get", {
+        "parentId": id
+    });
+    if(!result || result.result != "success") {
         return null;
     }
 

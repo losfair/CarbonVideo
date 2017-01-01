@@ -1,8 +1,8 @@
 import "babel-polyfill";
-import * as network from "./network.js";
 import * as pageUtils from "./pageUtils.js";
 import * as authUtils from "./authUtils.js";
 import * as videoManager from "./videoManager.js";
+import * as api from "./api.js";
 import {getPageModuleUrl} from "./pageModules.js";
 
 import {LatestVideos} from "./components/LatestVideos.js";
@@ -17,23 +17,8 @@ async function jumpToSsoLogin() {
 }
 
 async function getSiteTitle() {
-    let result = await network.makeRequest(
-        "POST",
-        "/config/site_title",
-        JSON.stringify({}), {
-            "Content-Type": "application/json"
-        }
-    );
-    if(!result) return false;
-    try {
-        result = JSON.parse(result);
-    } catch(e) {
-        return false;
-    }
-
-    if(result.result != "success") {
-        return false;
-    }
+    let result = await api.request("/config/site_title");
+    if(!result || result.result != "success") return false;
 
     return result.siteTitle;
 }

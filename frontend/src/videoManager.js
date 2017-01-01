@@ -1,7 +1,7 @@
 import * as pageUtils from "./pageUtils.js";
 import * as authUtils from "./authUtils.js";
-import * as network from "./network.js";
 import * as stringUtils from "./stringUtils.js";
+import * as api from "./api.js";
 
 import {LatestVideos} from "./components/LatestVideos.js";
 import {VideoComments} from "./components/VideoComments.js";
@@ -13,28 +13,13 @@ let currentVideoId = "";
 async function createVideo(title, key, desc) {
     let token = authUtils.getSessionToken();
 
-    let result = await network.makeRequest(
-        "POST",
-        "/video/new",
-        JSON.stringify({
-            "token": token,
-            "videoTitle": title,
-            "videoKey": key,
-            "videoDesc": desc
-        }), {
-            "Content-Type": "application/json"
-        }
-    );
-    if(!result) return false;
-    try {
-        result = JSON.parse(result);
-    } catch(e) {
-        return false;
-    }
-
-    if(result.result != "success") {
-        return false;
-    }
+    let result = await api.request("/video/new", {
+        "token": token,
+        "videoTitle": title,
+        "videoKey": key,
+        "videoDesc": desc
+    });
+    if(!result || result.result != "success") return false;
 
     return result.videoId;
 }

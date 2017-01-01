@@ -3,30 +3,13 @@ import ReactDOM from "react-dom";
 
 import * as pageUtils from "../pageUtils.js";
 import * as authUtils from "../authUtils.js";
-import * as network from "../network.js";
+import * as api from "../api.js";
 import * as stringUtils from "../stringUtils.js";
 import * as videoManager from "../videoManager.js";
 
 async function getVideoCount() {
-    let token = authUtils.getSessionToken();
-
-    let result = await network.makeRequest(
-        "POST",
-        "/video/count",
-        JSON.stringify({
-            "token": token
-        }), {
-            "Content-Type": "application/json"
-        }
-    );
-    if(!result) return false;
-    try {
-        result = JSON.parse(result);
-    } catch(e) {
-        return false;
-    }
-
-    if(result.result != "success") {
+    let result = await api.request("/video/count");
+    if(!result || result.result != "success") {
         return false;
     }
 
@@ -34,25 +17,8 @@ async function getVideoCount() {
 }
 
 async function getCommentCount() {
-    let token = authUtils.getSessionToken();
-
-    let result = await network.makeRequest(
-        "POST",
-        "/comment/count",
-        JSON.stringify({
-            "token": token
-        }), {
-            "Content-Type": "application/json"
-        }
-    );
-    if(!result) return null;
-    try {
-        result = JSON.parse(result);
-    } catch(e) {
-        return null;
-    }
-
-    if(result.result != "success") {
+    let result = await api.request("/comment/count");
+    if(!result || result.result != "success") {
         return null;
     }
 

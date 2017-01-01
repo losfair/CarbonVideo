@@ -3,31 +3,15 @@ import ReactDOM from "react-dom";
 
 import * as pageUtils from "../pageUtils.js";
 import * as authUtils from "../authUtils.js";
-import * as network from "../network.js";
+import * as api from "../api.js";
 import * as stringUtils from "../stringUtils.js";
 import * as videoManager from "../videoManager.js";
 
 async function getLatestVideos(count) {
-    let token = authUtils.getSessionToken();
-
-    let result = await network.makeRequest(
-        "POST",
-        "/video/latest",
-        JSON.stringify({
-            "token": token,
-            "count": count
-        }), {
-            "Content-Type": "application/json"
-        }
-    );
-    if(!result) return null;
-    try {
-        result = JSON.parse(result);
-    } catch(e) {
-        return null;
-    }
-
-    if(result.result != "success") {
+    let result = await api.request("/video/latest", {
+        "count": count
+    });
+    if(!result || result.result != "success") {
         return null;
     }
 

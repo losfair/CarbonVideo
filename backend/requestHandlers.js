@@ -5,10 +5,6 @@ const tokenManager = require("./tokenManager.js");
 const videoManager = require("./videoManager.js");
 const commentManager = require("./commentManager.js");
 
-function onGetSsoUrl(req, resp) {
-    resp.send(resources.cfg.ssoUrl);
-}
-
 async function verifyRequest(req, resp, args, requireAuth) {
     let returnValueOnSuccess = true;
 
@@ -57,6 +53,12 @@ async function verifyRequest(req, resp, args, requireAuth) {
     }
 
     return returnValueOnSuccess;
+}
+
+function onGetSsoUrl() {
+    return {
+        "ssoUrl": resources.cfg.ssoUrl
+    };
 }
 
 async function onGetSiteTitle() {
@@ -185,6 +187,11 @@ async function onGetVideoLikeCount(args) {
 }
 
 const handlers = {
+    "getSsoUrl": {
+        "requireAuth": false,
+        "func": onGetSsoUrl,
+        "args": []
+    },
     "getSiteTitle": {
         "requireAuth": false,
         "func": onGetSiteTitle,

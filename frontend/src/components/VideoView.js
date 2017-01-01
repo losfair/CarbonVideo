@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 
 import * as pageUtils from "../pageUtils.js";
 import * as authUtils from "../authUtils.js";
-import * as network from "../network.js";
+import * as api from "../api.js";
 import * as stringUtils from "../stringUtils.js";
 import * as videoManager from "../videoManager.js";
 
@@ -11,26 +11,10 @@ import { LatestVideos } from "./LatestVideos.js";
 import { VideoComments } from "./VideoComments.js";
 
 async function getVideoInfo(id) {
-    let token = authUtils.getSessionToken();
-
-    let result = await network.makeRequest(
-        "POST",
-        "/video/info",
-        JSON.stringify({
-            "token": token,
-            "videoId": id
-        }), {
-            "Content-Type": "application/json"
-        }
-    );
-    if (!result) return null;
-    try {
-        result = JSON.parse(result);
-    } catch (e) {
-        return null;
-    }
-
-    if (result.result != "success") {
+    let result = await api.request("/video/info", {
+        "videoId": id
+    });
+    if (!result || result.result != "success") {
         return null;
     }
 
@@ -40,24 +24,11 @@ async function getVideoInfo(id) {
 async function createVideoLike(id) {
     let token = authUtils.getSessionToken();
 
-    let result = await network.makeRequest(
-        "POST",
-        "/video/like/new",
-        JSON.stringify({
-            "token": token,
-            "videoId": id
-        }), {
-            "Content-Type": "application/json"
-        }
-    );
-    if (!result) return null;
-    try {
-        result = JSON.parse(result);
-    } catch (e) {
-        return null;
-    }
-
-    if (result.result != "success") {
+    let result = await api.request("/video/like/new", {
+        "token": token,
+        "videoId": id
+    });
+    if (!result || result.result != "success") {
         return null;
     }
 
@@ -65,26 +36,10 @@ async function createVideoLike(id) {
 }
 
 async function getVideoLikeCount(id) {
-    let token = authUtils.getSessionToken();
-
-    let result = await network.makeRequest(
-        "POST",
-        "/video/like/count",
-        JSON.stringify({
-            "token": token,
-            "videoId": id
-        }), {
-            "Content-Type": "application/json"
-        }
-    );
-    if (!result) return null;
-    try {
-        result = JSON.parse(result);
-    } catch (e) {
-        return null;
-    }
-
-    if (result.result != "success") {
+    let result = await api.request("/video/like/count", {
+        "videoId": id
+    });
+    if (!result || result.result != "success") {
         return null;
     }
 
