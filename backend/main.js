@@ -10,7 +10,11 @@ async function run() {
     await resources.init();
 
     app = express();
-    app.use(express.static(resources.cfg.webDirectory));
+
+    let webDirectory = "../web";
+    if(resources.cfg.webDirectory) webDirectory = resources.cfg.webDirectory;
+    
+    app.use(express.static(webDirectory));
     app.use(bodyParser.json());
 
     app.post("/config/sso_url", requestHandlers.onGetSsoUrl);
