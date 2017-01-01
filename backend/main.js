@@ -1,3 +1,4 @@
+const path = require("path");
 const util = require("util");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -11,9 +12,9 @@ async function run() {
 
     app = express();
 
-    let webDirectory = "../web";
+    let webDirectory = path.join(__dirname, "../web");
     if(resources.cfg.webDirectory) webDirectory = resources.cfg.webDirectory;
-    
+
     app.use(express.static(webDirectory));
     app.use(bodyParser.json());
 
