@@ -8,6 +8,7 @@ import {getPageModuleUrl} from "./pageModules.js";
 import {LatestVideos} from "./components/LatestVideos.js";
 import {StatisticsInfo} from "./components/StatisticsInfo.js";
 import {VideoView} from "./components/VideoView.js";
+import {AdminPanel} from "./components/AdminPanel.js";
 import React from "react";
 import ReactDOM from "react-dom";
 
@@ -41,6 +42,12 @@ async function updatePortalContent() {
     ), document.getElementById("portal-content-container"));
 }
 
+function showAdminPanel() {
+    ReactDOM.render((
+        <AdminPanel />
+    ), document.getElementById("admin-panel-container"));
+}
+
 function showVideoView(videoId) {
     if(!videoId) videoId = videoManager.getCurrentVideoId();
     if(!videoId) videoId = pageUtils.getParameterByName("videoId");
@@ -61,6 +68,7 @@ function initGlobalExports() {
     window.showVideoShareLink = videoManager.showVideoShareLink;
     window.setCurrentVideoId = videoManager.setCurrentVideoId;
     window.showVideoView = showVideoView;
+    window.showAdminPanel = showAdminPanel;
 }
 
 function initUserStyles(isAdmin) {
