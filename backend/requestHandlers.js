@@ -59,6 +59,12 @@ async function verifyRequest(req, resp, args, requireAuth) {
     return returnValueOnSuccess;
 }
 
+async function onGetSiteTitle() {
+    return {
+        "siteTitle": resources.cfg.siteTitle
+    };
+}
+
 async function onUserAuthenticate(args) {
     let data = await rp.post(
         resources.cfg.ssoUrl + "identity/verify/verify_client_token",
@@ -179,6 +185,11 @@ async function onGetVideoLikeCount(args) {
 }
 
 const handlers = {
+    "getSiteTitle": {
+        "requireAuth": false,
+        "func": onGetSiteTitle,
+        "args": []
+    },
     "userAuthenticate": {
         "requireAuth": false,
         "func": onUserAuthenticate,

@@ -11,11 +11,31 @@ import {VideoView} from "./components/VideoView.js";
 import React from "react";
 import ReactDOM from "react-dom";
 
-const constants = require("./constants.js");
-
 async function jumpToSsoLogin() {
     let url = await authUtils.getSsoUrl();
     window.location.replace(url + "identity/user/login?callback=" + encodeURIComponent(window.location.href.split("?")[0]));
+}
+
+async function getSiteTitle() {
+    let result = await network.makeRequest(
+        "POST",
+        "/config/site_title",
+        JSON.stringify({}), {
+            "Content-Type": "application/json"
+        }
+    );
+    if(!result) return false;
+    try {
+        result = JSON.parse(result);
+    } catch(e) {
+        return false;
+    }
+
+    if(result.result != "success") {
+        return false;
+    }
+
+    return result.siteTitle;
 }
 
 function doLogout() {
@@ -76,9 +96,11 @@ async function initPage() {
     initEventListeners();
     initGlobalExports();
 
-    if(constants.siteTitle) {
-        document.title = constants.siteTitle;
-        document.getElementById("navbar-site-title").innerHTML = constants.siteTitle;
+    let siteTitle = await getSiteTitle();
+
+    if(siteTitle) {
+        document.title = siteTitle;
+        document.getElementById("navbar-site-title").innerHTML = siteTitle;
     }
 
     if(pageUtils.getParameterByName("client_token")) {

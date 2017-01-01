@@ -19,6 +19,7 @@ async function run() {
     app.use(bodyParser.json());
 
     app.post("/config/sso_url", requestHandlers.onGetSsoUrl);
+    app.post("/config/site_title", requestHandlers.onRequest("getSiteTitle"));
     app.post("/user/authenticate", requestHandlers.onRequest("userAuthenticate"));
     app.post("/user/check", requestHandlers.onRequest("userCheck"));
     app.post("/video/new", requestHandlers.onRequest("newVideo"));
