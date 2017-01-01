@@ -1,13 +1,12 @@
 const util = require("util");
 const rp = require("request-promise");
 const resources = require("./resources.js");
-const constants = require("./constants.js");
 const tokenManager = require("./tokenManager.js");
 const videoManager = require("./videoManager.js");
 const commentManager = require("./commentManager.js");
 
 function onGetSsoUrl(req, resp) {
-    resp.send(constants.SSO_URL);
+    resp.send(resources.cfg.ssoUrl);
 }
 
 async function verifyRequest(req, resp, args, requireAuth) {
@@ -62,7 +61,7 @@ async function verifyRequest(req, resp, args, requireAuth) {
 
 async function onUserAuthenticate(args) {
     let data = await rp.post(
-        constants.SSO_URL + "identity/verify/verify_client_token",
+        resources.cfg.ssoUrl + "identity/verify/verify_client_token",
         {
             "form": {
                 "client_token": args.ssoToken
@@ -76,7 +75,7 @@ async function onUserAuthenticate(args) {
         || data.err !== 0
         || !data.username
         || !util.isString(data.username)
-        || (constants.DOMAIN && (!data.domain || data.domain != constants.DOMAIN))
+        || (resources.cfg.domain && (!data.domain || data.domain != resources.cfg.domain))
     ) {
         throw "Authentication failed";
     }

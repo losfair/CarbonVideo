@@ -11,6 +11,8 @@ import {VideoView} from "./components/VideoView.js";
 import React from "react";
 import ReactDOM from "react-dom";
 
+const constants = require("./constants.js");
+
 async function jumpToSsoLogin() {
     let url = await authUtils.getSsoUrl();
     window.location.replace(url + "identity/user/login?callback=" + encodeURIComponent(window.location.href.split("?")[0]));
@@ -73,6 +75,11 @@ function initUserStyles(isAdmin) {
 async function initPage() {
     initEventListeners();
     initGlobalExports();
+
+    if(constants.siteTitle) {
+        document.title = constants.siteTitle;
+        document.getElementById("navbar-site-title").innerHTML = constants.siteTitle;
+    }
 
     if(pageUtils.getParameterByName("client_token")) {
         let result = await authUtils.doSsoAuthenticate(pageUtils.getParameterByName("client_token"));

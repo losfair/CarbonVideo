@@ -1,5 +1,4 @@
 const resources = require("./resources.js");
-const constants = require("./constants.js");
 const randomstring = require("randomstring");
 
 async function createToken(username) {
@@ -22,8 +21,8 @@ async function checkToken(token) {
 
     result = result[0];
     if(
-           constants.TOKEN_EXPIRE_SECONDS
-        && Date.now() - result.createTime > constants.TOKEN_EXPIRE_SECONDS * 1000
+           resources.cfg.tokenExpireSeconds
+        && Date.now() - result.createTime > resources.cfg.tokenExpireSeconds * 1000
     ) {
         return false;
     }

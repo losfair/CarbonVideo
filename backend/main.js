@@ -2,7 +2,6 @@ const util = require("util");
 const express = require("express");
 const bodyParser = require("body-parser");
 const resources = require("./resources.js");
-const constants = require("./constants.js");
 const requestHandlers = require("./requestHandlers.js");
 
 const app = express();
@@ -24,7 +23,7 @@ app.post("/comment/count", requestHandlers.onRequest("getCommentCount"));
 
 async function run() {
     await resources.init();
-    app.listen(constants.LISTEN_PORT);
+    app.listen(resources.cfg.listenPort);
 }
 
 run();

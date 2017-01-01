@@ -1,28 +1,26 @@
 {
-  "name": "hydrocloud-xiaoti-frontend",
+  "name": "carbonvideo-frontend",
   "version": "0.1.0",
-  "description": "HydroCloud Xiaoti Frontend",
+  "description": "CarbonVideo Frontend",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hydrocloud/HydroCloudNG.git"
+    "url": "git+https://github.com/losfair/CarbonVideo.git"
   },
   "keywords": [
-    "hydrocloud",
-    "xiaoti",
-    "education",
     "frontend",
-    "cloud"
+    "video",
+    "carbon"
   ],
   "author": "Heyang Zhou",
   "license": "LGPL-3.0",
   "bugs": {
-    "url": "https://github.com/hydrocloud/HydroCloudNG/issues"
+    "url": "https://github.com/losfair/CarbonVideo/issues"
   },
-  "homepage": "https://github.com/hydrocloud/HydroCloudNG#readme",
+  "homepage": "https://github.com/losfair/CarbonVideo#readme",
   "devDependencies": {
     "babel-plugin-transform-runtime": "^6.15.0",
     "babel-polyfill": "^6.20.0",
