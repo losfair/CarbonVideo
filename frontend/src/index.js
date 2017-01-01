@@ -5,6 +5,12 @@ import * as authUtils from "./authUtils.js";
 import * as videoManager from "./videoManager.js";
 import {getPageModuleUrl} from "./pageModules.js";
 
+import {LatestVideos} from "./components/LatestVideos.js";
+import {StatisticsInfo} from "./components/StatisticsInfo.js";
+import {VideoView} from "./components/VideoView.js";
+import React from "react";
+import ReactDOM from "react-dom";
+
 async function jumpToSsoLogin() {
     let url = await authUtils.getSsoUrl();
     window.location.replace(url + "identity/user/login?callback=" + encodeURIComponent(window.location.href.split("?")[0]));
@@ -20,9 +26,20 @@ function initEventListeners() {
 }
 
 async function updatePortalContent() {
-    pageUtils.setElementInnerHtmlById("video-count", await videoManager.getVideoCount());
-    pageUtils.setElementInnerHtmlById("comment-count", await videoManager.getCommentCount());
-    pageUtils.setElementInnerHtmlById("latest-videos", await videoManager.showLatestVideos());
+    ReactDOM.render((
+        <div>
+            <StatisticsInfo />
+            <LatestVideos />
+        </div>
+    ), document.getElementById("portal-content-container"));
+}
+
+function showVideoView(videoId) {
+    if(!videoId) videoId = videoManager.getCurrentVideoId();
+    if(!videoId) videoId = pageUtils.getParameterByName("videoId");
+    ReactDOM.render((
+        <VideoView videoId={videoId} />
+    ), document.getElementById("video-view-container"));
 }
 
 function initGlobalExports() {
@@ -36,6 +53,7 @@ function initGlobalExports() {
     window.jumpToSsoLogin = jumpToSsoLogin;
     window.showVideoShareLink = videoManager.showVideoShareLink;
     window.setCurrentVideoId = videoManager.setCurrentVideoId;
+    window.showVideoView = showVideoView;
 }
 
 function initUserStyles(isAdmin) {

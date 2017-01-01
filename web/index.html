@@ -14,29 +14,29 @@
 </head>
 
 <body>
-	<nav class="navbar navbar-default" id="top-navbar" role="navigation">
+	<nav class="navbar navbar-default navbar-fixed-top" id="top-navbar" role="navigation">
 		<div class="navbar-header">
 
-			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#top-navbar-collapse">
 						 <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
-					</button> <a class="navbar-brand" href="#" onclick="loadPageModule('portal')">学霸讲小题</a>
+					</button> <a class="navbar-brand" href="javascript:;" onclick="loadPageModule('portal')">学霸讲小题</a>
 		</div>
 
-		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+		<div class="collapse navbar-collapse" id="top-navbar-collapse">
 			<ul class="nav navbar-nav">
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
 				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="current-username-navbar">未登录</span><strong class="caret"></strong></a>
+					<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"><span id="current-username-navbar">未登录</span><strong class="caret"></strong>&nbsp;</a>
 					<ul class="dropdown-menu">
 						<li class="dropdown-menu-not-logged-in">
-							<a href="#" onclick="jumpToSsoLogin()">登录</a>
+							<a href="javascript:;" onclick="jumpToSsoLogin()">登录</a>
 						</li>
 						<li class="dropdown-menu-logged-in dropdown-menu-admin">
-							<a href="#" onclick="loadPageModule('admin')">管理</a>
+							<a href="javascript:;" onclick="loadPageModule('admin')">管理</a>
 						</li>
 						<li class="dropdown-menu-logged-in">
-							<a href="#" id="logout-button">登出</a>
+							<a href="javascript:;" id="logout-button">登出</a>
 						</li>
 					</ul>
 				</li>
@@ -44,6 +44,9 @@
 		</div>
 
 	</nav>
+
+	<!-- Placeholder -->
+	<div style="height: 80px"></div>
 
 	<div class="container-fluid">
 		<div class="row">
