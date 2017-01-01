@@ -28,6 +28,7 @@ async function run() {
     app.post("/video/latest", requestHandlers.onRequest("getLatestVideos"));
     app.post("/video/like/new", requestHandlers.onRequest("createVideoLike"));
     app.post("/video/like/count", requestHandlers.onRequest("getVideoLikeCount"));
+    app.post("/video/upload/request", requestHandlers.onRequest("requestClientVideoUpload"));
     app.post("/comment/new", requestHandlers.onRequest("createComment"));
     app.post("/comment/get", requestHandlers.onRequest("getComments"));
     app.post("/comment/count", requestHandlers.onRequest("getCommentCount"));

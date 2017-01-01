@@ -4,6 +4,7 @@ const resources = require("./resources.js");
 const tokenManager = require("./tokenManager.js");
 const videoManager = require("./videoManager.js");
 const commentManager = require("./commentManager.js");
+const fileManager = require("./fileManager.js");
 
 async function verifyRequest(req, resp, args, requireAuth) {
     let returnValueOnSuccess = true;
@@ -186,6 +187,12 @@ async function onGetVideoLikeCount(args) {
     };
 }
 
+async function onRequestClientVideoUpload(args, username) {
+    let result = await fileManager.requestClientUpload(username, "mp4");
+    if(!result) throw "Unable to request client upload";
+    return result;
+}
+
 const handlers = {
     "getSsoUrl": {
         "requireAuth": false,
@@ -303,6 +310,11 @@ const handlers = {
                 "type": "string"
             }
         ]
+    },
+    "requestClientVideoUpload": {
+        "requireAuth": true,
+        "func": onRequestClientVideoUpload,
+        "args": []
     }
 };
 

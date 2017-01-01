@@ -21,6 +21,20 @@ async function createVideo(title, key, desc) {
     return result.videoId;
 }
 
+async function requestVideoUpload() {
+    let token = authUtils.getSessionToken();
+
+    let result = await api.request("/video/upload/request", {
+        "token": token,
+    });
+    if(!result || result.result != "success") return false;
+
+    return {
+        "uploadKey": result.uploadKey,
+        "uploadToken": result.uploadToken
+    };
+}
+
 export class AdminPanel extends React.Component {
     constructor(props) {
         super(props);
@@ -37,6 +51,15 @@ export class AdminPanel extends React.Component {
         } else {
             pageUtils.showWarningBox("视频创建成功: " + result);
         }
+    }
+    async onRequestVideoUpload() {
+        let uploadInfo = await requestVideoUpload();
+        if(!uploadInfo) {
+            pageUtils.showWarningBox("上传请求失败。");
+            return;
+        }
+        document.getElementById("videoKey").value = uploadInfo.uploadKey;
+        pageUtils.showWarningBox("上传 Token: " + uploadInfo.uploadToken);
     }
     componentDidMount() {
     }
@@ -56,11 +79,14 @@ export class AdminPanel extends React.Component {
                                 </label>
                             <input type="text" className="form-control" id="videoTitle" />
                         </div>
+                        <button className="btn btn-default" onClick={() => this.onRequestVideoUpload()}>
+                            上传视频
+                            </button>
                         <div className="form-group">
                             <label for="videoKey">
                                 视频 Key
                                 </label>
-                            <input type="text" className="form-control" id="videoKey" />
+                            <input type="text" disabled className="form-control" id="videoKey" />
                         </div>
                         <div className="form-group">
                             <label for="videoDesc">
