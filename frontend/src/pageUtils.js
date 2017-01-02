@@ -1,5 +1,5 @@
 import * as network from "./network.js";
-import {getPageModuleUrl} from "./pageModules.js";
+import * as pageModules from "./pageModules.js";
 
 let pageModuleCache = {};
 
@@ -66,42 +66,11 @@ export function showWarningBox(content) {
     boxElem.style.display = "block";
 }
 
-export async function loadPageModule(moduleName) {
-    let url = getPageModuleUrl(moduleName);
-    if(!url) return;
+export function loadPageModule(moduleName) {
+    let target = pageModules.getPageModuleHandler(moduleName);
+    if(!target) return;
 
-    let allModules = document.getElementsByClassName("page-module");
-    for(let i = 0; i < allModules.length; i++) {
-        let m = allModules[i];
-        m.style.display = "none";
-        m.innerHTML = "";
-    }
-    let elem = document.getElementById("current-module");
-    if(!elem) return;
-
-    let pageModuleContent = "";
-
-    let contentCache = pageModuleCache[url];
-    if(contentCache) pageModuleContent = contentCache;
-    else {
-        pageModuleContent = await network.makeRequest(
-            "GET",
-            url
-        );
-        pageModuleCache[url] = pageModuleContent;
-    }
-    elem.innerHTML = pageModuleContent;
-
-    let scripts = elem.getElementsByTagName("script");
-    for(let i = 0; i < scripts.length; i++) {
-        let scriptElem = document.createElement("script");
-        if(scripts[i].src) scriptElem.src = scripts[i].src;
-        else scriptElem.innerHTML = scripts[i].innerHTML;
-        document.body.appendChild(scriptElem);
-        document.body.removeChild(scriptElem);
-    }
-
-    elem.style.display = "block";
+    target();
 
     hideWarningBox();
 

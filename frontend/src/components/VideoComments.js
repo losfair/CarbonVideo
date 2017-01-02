@@ -57,6 +57,10 @@ export class VideoComments extends React.Component {
             this.setState({
                 "videoComments": data
             });
+        } else {
+            this.setState({
+                "videoComments": ""
+            });
         }
     }
     async onCreateVideoComment() {
@@ -71,6 +75,9 @@ export class VideoComments extends React.Component {
     }
     componentDidMount() {
         this.updateVideoComments();
+    }
+    componentDidUpdate(prevProps, prevState) {
+        if(prevProps.videoId != this.props.videoId) this.updateVideoComments();
     }
     render() {
         return (

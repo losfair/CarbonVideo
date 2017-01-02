@@ -99,6 +99,9 @@ export class VideoView extends React.Component {
     componentDidMount() {
         this.updateVideoView();
     }
+    componentDidUpdate(prevProps, prevState) {
+        if(prevProps.videoId != this.props.videoId) this.updateVideoView();
+    }
     render() {
         return (
             <div>

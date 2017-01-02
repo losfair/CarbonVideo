@@ -1,11 +1,12 @@
-const pageModules = {
-    "portal": "portal.html",
-    "admin": "admin.html",
-    "videoView": "videoView.html"
-};
+import * as pageRenderer from "./pageRenderer.js";
 
-export function getPageModuleUrl(name) {
-    let url = pageModules[name];
-    if(!url) return null;
-    return url;
+const handlers = {
+    "portal": pageRenderer.showPortal,
+    "admin": pageRenderer.showAdminPanel,
+    "videoView": pageRenderer.showVideoView
+}
+
+export function getPageModuleHandler(name) {
+    if(!name) return;
+    return handlers[name];
 }

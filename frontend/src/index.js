@@ -3,14 +3,8 @@ import * as pageUtils from "./pageUtils.js";
 import * as authUtils from "./authUtils.js";
 import * as videoManager from "./videoManager.js";
 import * as api from "./api.js";
-import {getPageModuleUrl} from "./pageModules.js";
-
-import {LatestVideos} from "./components/LatestVideos.js";
-import {StatisticsInfo} from "./components/StatisticsInfo.js";
-import {VideoView} from "./components/VideoView.js";
-import {AdminPanel} from "./components/AdminPanel.js";
-import React from "react";
-import ReactDOM from "react-dom";
+import * as pageRenderer from "./pageRenderer.js";
+import * as pageModules from "./pageModules.js";
 
 async function jumpToSsoLogin() {
     let url = await authUtils.getSsoUrl();
@@ -33,42 +27,15 @@ function initEventListeners() {
     pageUtils.bindActionById("logout-button", "click", doLogout);
 }
 
-async function updatePortalContent() {
-    ReactDOM.render((
-        <div>
-            <StatisticsInfo />
-            <LatestVideos />
-        </div>
-    ), document.getElementById("portal-content-container"));
-}
-
-function showAdminPanel() {
-    ReactDOM.render((
-        <AdminPanel />
-    ), document.getElementById("admin-panel-container"));
-}
-
-function showVideoView(videoId) {
-    if(!videoId) videoId = videoManager.getCurrentVideoId();
-    if(!videoId) videoId = pageUtils.getParameterByName("videoId");
-    ReactDOM.render((
-        <VideoView videoId={videoId} />
-    ), document.getElementById("video-view-container"));
-}
-
 function initGlobalExports() {
     window.loadPageModule = pageUtils.loadPageModule;
     window.onCreateVideo = videoManager.onCreateVideo;
-    window.updatePortalContent = updatePortalContent;
-    window.updateVideoView = videoManager.updateVideoView;
-    window.onCreateComment = videoManager.onCreateComment;
+    window.updatePortalContent = () => pageUtils.loadPageModule("portal");
     window.showWarningBox = pageUtils.showWarningBox;
     window.hideWarningBox = pageUtils.hideWarningBox;
     window.jumpToSsoLogin = jumpToSsoLogin;
     window.showVideoShareLink = videoManager.showVideoShareLink;
     window.setCurrentVideoId = videoManager.setCurrentVideoId;
-    window.showVideoView = showVideoView;
-    window.showAdminPanel = showAdminPanel;
 }
 
 function initUserStyles(isAdmin) {
@@ -118,9 +85,7 @@ async function initPage() {
 
     if(pageUtils.getParameterByName("module")) {
         let targetModuleName = pageUtils.getParameterByName("module");
-        if(await pageUtils.loadPageModule(targetModuleName)) {
-            return;
-        }
+        if(pageUtils.loadPageModule(targetModuleName)) return;
     }
 
     pageUtils.loadPageModule("portal");

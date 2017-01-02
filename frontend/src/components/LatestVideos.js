@@ -6,6 +6,7 @@ import * as authUtils from "../authUtils.js";
 import * as api from "../api.js";
 import * as stringUtils from "../stringUtils.js";
 import * as videoManager from "../videoManager.js";
+import * as pageRenderer from "../pageRenderer.js";
 
 async function getLatestVideos(count) {
     let result = await api.request("/video/latest", {
