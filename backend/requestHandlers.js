@@ -115,6 +115,12 @@ async function onNewVideo(args, username) {
     };
 }
 
+async function onRemoveVideo(args, username) {
+    let result = await videoManager.removeVideo(username, args.videoId);
+    if(!result) throw "Unable to remove video";
+    return {};
+}
+
 async function onGetVideoInfo(args) {
     let videoInfo = await videoManager.getVideoInfo(args.videoId);
     if (!videoInfo) throw "No video info";
@@ -193,6 +199,12 @@ async function onRequestClientVideoUpload(args, username) {
     return result;
 }
 
+async function onCheckClientVideoUpload(args, username) {
+    let result = await fileManager.checkClientUpload(args.uploadId, username);
+    if(!result) throw "Unable to check client upload";
+    return {};
+}
+
 const handlers = {
     "getSsoUrl": {
         "requireAuth": false,
@@ -231,6 +243,16 @@ const handlers = {
                 "type": "string"
             }, {
                 "name": "videoDesc",
+                "type": "string"
+            }
+        ]
+    },
+    "removeVideo": {
+        "requireAuth": true,
+        "func": onRemoveVideo,
+        "args": [
+            {
+                "name": "videoId",
                 "type": "string"
             }
         ]
@@ -315,6 +337,16 @@ const handlers = {
         "requireAuth": true,
         "func": onRequestClientVideoUpload,
         "args": []
+    },
+    "checkClientVideoUpload": {
+        "requireAuth": true,
+        "func": onCheckClientVideoUpload,
+        "args": [
+            {
+                "name": "uploadId",
+                "type": "string"
+            }
+        ]
     }
 };
 
@@ -337,20 +369,11 @@ function onRequest(handlerName) {
         try {
             result = await targetHandler.func(req.body, username);
             if(!result) throw "Empty response from target handler";
-        } catch(e) {
-            resp.send(JSON.stringify({
-                "result": "failed",
-                "msg": e.toString()
-            }));
-            return;
-        }
-
-        try {
             if(!util.isObject(result)) throw "Response is not an object";
         } catch(e) {
             resp.send(JSON.stringify({
                 "result": "failed",
-                "msg": "Bad response type from target handler"
+                "msg": e.toString()
             }));
             return;
         }

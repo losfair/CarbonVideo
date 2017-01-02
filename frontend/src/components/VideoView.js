@@ -54,6 +54,20 @@ function createVideoShareLink(targetVideoId) {
     return result;
 }
 
+async function removeVideo(id) {
+    let token = authUtils.getSessionToken();
+
+    let result = await api.request("/video/remove", {
+        "token": token,
+        "videoId": id
+    });
+    if (!result || result.result != "success") {
+        return false;
+    }
+
+    return true;
+}
+
 export class VideoView extends React.Component {
     constructor(props) {
         super(props);
@@ -75,6 +89,14 @@ export class VideoView extends React.Component {
         if (newLikeCount) this.setState({
             "videoLikeCount": newLikeCount
         });
+    }
+    async onRemoveVideo() {
+        let result = await removeVideo(this.props.videoId);
+        if(!result) {
+            pageUtils.showWarningBox("移除失败。");
+            return;
+        }
+        pageUtils.loadPageModule("portal");
     }
     async updateVideoView() {
         let targetVideoId = this.props.videoId;
@@ -114,6 +136,8 @@ export class VideoView extends React.Component {
                     <i className="fa fa-plus video-operation-icon" aria-hidden="true"></i>
                     <div className="video-operation-placeholder"></div>
                     <i className="fa fa-share-alt video-operation-icon" aria-hidden="true" onClick={() => this.onShowVideoShareLink()}></i>
+                    <div className="video-operation-placeholder"></div>
+                    <i className="fa fa-trash video-operation-icon video-operation-icon-admin" onClick = {() => this.onRemoveVideo()} aria-hidden="true"></i>
                 </div>
                 <div className="jumbotron" id="video-info">
                     <h3>视频信息</h3>

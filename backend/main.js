@@ -23,12 +23,14 @@ async function run() {
     app.post("/user/authenticate", requestHandlers.onRequest("userAuthenticate"));
     app.post("/user/check", requestHandlers.onRequest("userCheck"));
     app.post("/video/new", requestHandlers.onRequest("newVideo"));
+    app.post("/video/remove", requestHandlers.onRequest("removeVideo"));
     app.post("/video/info", requestHandlers.onRequest("getVideoInfo"));
     app.post("/video/count", requestHandlers.onRequest("getVideoCount"));
     app.post("/video/latest", requestHandlers.onRequest("getLatestVideos"));
     app.post("/video/like/new", requestHandlers.onRequest("createVideoLike"));
     app.post("/video/like/count", requestHandlers.onRequest("getVideoLikeCount"));
     app.post("/video/upload/request", requestHandlers.onRequest("requestClientVideoUpload"));
+    app.post("/video/upload/check", requestHandlers.onRequest("checkClientVideoUpload"));
     app.post("/comment/new", requestHandlers.onRequest("createComment"));
     app.post("/comment/get", requestHandlers.onRequest("getComments"));
     app.post("/comment/count", requestHandlers.onRequest("getCommentCount"));

@@ -65,6 +65,10 @@
     font-size: 24px;
 }
 
+.video-operation-icon-admin {
+    display: none;
+}
+
 .video-operation-placeholder {
     display: inline-block;
     width: 20px;

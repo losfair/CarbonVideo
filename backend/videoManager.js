@@ -24,6 +24,30 @@ async function createVideo(username, title, key, desc) {
     return videoId;
 }
 
+async function removeVideo(username, videoId) {
+    if(resources.adminUserList.indexOf(username) < 0) {
+        return null;
+    }
+
+    let result = await resources.db.collection("videos").find({
+        "videoId": videoId
+    }).toArray();
+
+    if(!result || !result.length) {
+        return null;
+    }
+
+    result = result[0];
+
+    await resources.db.collection("videos").remove({
+        "_id": result._id
+    });
+
+    resources.db.collection("removedVideos").insertOne(result);
+
+    return true;
+}
+
 async function getVideoInfo(id) {
     let result = await resources.db.collection("videos").find({
         "videoId": id
@@ -150,6 +174,7 @@ async function getVideoLikeCount(id) {
 }
 
 module.exports.createVideo = createVideo;
+module.exports.removeVideo = removeVideo;
 module.exports.getVideoInfo = getVideoInfo;
 module.exports.getVideoCount = getVideoCount;
 module.exports.getLatestVideos = getLatestVideos;

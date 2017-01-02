@@ -30,6 +30,7 @@ async function requestVideoUpload() {
     if(!result || result.result != "success") return false;
 
     return {
+        "uploadId": result.uploadId,
         "uploadKey": result.uploadKey,
         "uploadToken": result.uploadToken
     };
@@ -39,6 +40,8 @@ export class AdminPanel extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            "uploadStatus": "未完成",
+            "uploadButtonDisabled": false
         };
     }
     async onCreateVideo() {
@@ -52,6 +55,22 @@ export class AdminPanel extends React.Component {
             pageUtils.showWarningBox("视频创建成功: " + result);
         }
     }
+    async updateUploadStatus() {
+        let token = authUtils.getSessionToken();
+
+        let result = await api.request("/video/upload/check", {
+            "token": token,
+            "uploadId": this.uploadId
+        });
+        if(result && result.result == "success") {
+            clearInterval(this.uploadStatusUpdaterIntervalId);
+            delete this.uploadStatusUpdaterIntervalId;
+            this.setState({
+                "uploadStatus": "已完成"
+            });
+            pageUtils.hideWarningBox();
+        }
+    }
     async onRequestVideoUpload() {
         let uploadInfo = await requestVideoUpload();
         if(!uploadInfo) {
@@ -60,8 +79,19 @@ export class AdminPanel extends React.Component {
         }
         document.getElementById("videoKey").value = uploadInfo.uploadKey;
         pageUtils.showWarningBox("上传 Token: " + uploadInfo.uploadToken);
+        this.uploadId = uploadInfo.uploadId;
+        this.uploadStatusUpdaterIntervalId = setInterval(() => this.updateUploadStatus(), 5000);
+        this.setState({
+            "uploadButtonDisabled": true
+        });
     }
     componentDidMount() {
+    }
+    componentWillUnmount() {
+        if(this.uploadStatusUpdaterIntervalId) {
+            clearInterval(this.uploadStatusUpdaterIntervalId);
+            delete this.uploadStatusUpdaterIntervalId;
+        }
     }
     render() {
         return (
@@ -79,9 +109,10 @@ export class AdminPanel extends React.Component {
                                 </label>
                             <input type="text" className="form-control" id="videoTitle" />
                         </div>
-                        <button className="btn btn-default" onClick={() => this.onRequestVideoUpload()}>
+                        <button className="btn btn-default" disabled={this.state.uploadButtonDisabled} onClick={() => this.onRequestVideoUpload()}>
                             上传视频
                             </button>
+                            <span>{this.state.uploadStatus}</span>
                         <div className="form-group">
                             <label for="videoKey">
                                 视频 Key

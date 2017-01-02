@@ -91,6 +91,88 @@ function getDownloadUrl(key) {
     return downloadUrl;
 }
 
+function getFileInfo(key) {
+    return new Promise((resolve, reject) => {
+        if(!validateKey(key)) {
+            reject("Invalid key");
+            return;
+        }
+        let client = new qiniu.rs.Client();
+        client.stat(qnCfg.bucket, key, (err, info) => {
+            if(!err) {
+                resolve(info);
+            } else {
+                reject(err);
+            }
+        });
+    });
+}
+
+async function checkClientUpload(uploadId, username) {
+    let findConditions = {
+        "uploadId": uploadId
+    };
+    if(username) findConditions.username = username;
+
+    let uploadInfo = await resources.db.collection("uploads")
+        .find(findConditions)
+        .toArray();
+
+    if(!uploadInfo || !uploadInfo.length) {
+        throw "Upload not found";
+    }
+
+    uploadInfo = uploadInfo[0];
+
+    if(uploadInfo.done) {
+        throw "Upload already confirmed";
+    }
+
+    if(Date.now() - uploadInfo.lastCheckTime < 3000) {
+        throw "Try again later";
+    }
+
+    await resources.db.collection("uploads").update({
+        "_id": uploadInfo._id
+    }, {
+        "$set": {
+            "lastCheckTime": Date.now()
+        }
+    });
+
+    let fileInfo;
+    try {
+        fileInfo = await getFileInfo(uploadInfo.uploadKey);
+    } catch(e) {
+        throw "Unable to get file info";
+    }
+
+    await resources.db.collection("uploads").update({
+        "_id": uploadInfo._id
+    }, {
+        "$set": {
+            "done": true
+        }
+    });
+
+    return true;
+}
+
+let lastClientUploadAutoRemoveTime = 0;
+
+async function removeOldClientUploadedFiles() {
+    let currentTime = Date.now();
+
+    if(currentTime - lastClientUploadAutoRemoveTime < 600000) return;
+    lastClientUploadAutoRemoveTime = currentTime;
+
+    await resources.db.collection("uploads").remove({
+        "createTime": {
+            "$lt": currentTime - 3600000
+        }
+    });
+}
+
 async function requestClientUpload(username, extName) {
     if(!qnCfg.prefix) {
         throw "Prefix not configured";
@@ -107,16 +189,22 @@ async function requestClientUpload(username, extName) {
 
     let uploadToken = generateUploadToken(qnCfg.bucket, uploadKey);
 
-    /*await resources.db.collection("uploads").insertOne({
+    // This can be async so no need to await.
+    removeOldClientUploadedFiles();
+
+    await resources.db.collection("uploads").insertOne({
         "uploadId": uploadId,
+        "uploadKey": uploadKey,
         "extName": extName,
         "uploadToken": uploadToken,
         "username": username,
         "createTime": Date.now(),
+        "lastCheckTime": 0,
         "done": false
-    });*/
+    });
 
     return {
+        "uploadId": uploadId,
         "uploadKey": uploadKey,
         "uploadToken": uploadToken
     };
@@ -127,3 +215,4 @@ module.exports.generateUploadToken = generateUploadToken;
 module.exports.uploadFile = uploadFile;
 module.exports.getDownloadUrl = getDownloadUrl;
 module.exports.requestClientUpload = requestClientUpload;
+module.exports.checkClientUpload = checkClientUpload;
