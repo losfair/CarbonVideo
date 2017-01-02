@@ -2,6 +2,7 @@ const path = require("path");
 const util = require("util");
 const express = require("express");
 const bodyParser = require("body-parser");
+const RateLimit = require("express-rate-limit");
 const resources = require("./resources.js");
 const requestHandlers = require("./requestHandlers.js");
 
@@ -14,6 +15,18 @@ async function run() {
 
     let webDirectory = path.join(__dirname, "../web");
     if(resources.cfg.webDirectory) webDirectory = resources.cfg.webDirectory;
+
+    let rateLimitRule = new RateLimit({
+        "windowMs": 2 * 60 * 1000, // 2 mins
+        "delayAfter": 60,
+        "delayMs": 100,
+        "max": 300,
+        "message": JSON.stringify({
+            "result": "failed",
+            "msg": "Request frequency too high"
+        })
+    });
+    app.use(rateLimitRule);
 
     app.use(express.static(webDirectory));
     app.use(bodyParser.json());
@@ -35,6 +48,7 @@ async function run() {
     app.post("/comment/get", requestHandlers.onRequest("getComments"));
     app.post("/comment/count", requestHandlers.onRequest("getCommentCount"));
 
+    console.log("Listening on port " + resources.cfg.listenPort);
     app.listen(resources.cfg.listenPort);
 }
 

@@ -3,64 +3,13 @@ const fs = require("fs");
 const util = require("util");
 const uuid = require("uuid");
 const resources = require("./resources.js");
+const helper = require("carbonvideo-backend-helper");
 
 let qnCfg = fs.readFileSync("config/qiniu.json", "utf-8");
 qnCfg = JSON.parse(qnCfg);
 
 qiniu.conf.ACCESS_KEY = qnCfg.accessKey;
 qiniu.conf.SECRET_KEY = qnCfg.secretKey;
-
-function validateKey(key) {
-    if (
-        !key
-        || !util.isString(key)
-        || key.length == 0
-        || key.length > 128
-    ) {
-        return false;
-    }
-
-    for (let i = 0; i < key.length; i++) {
-        let c = key[i];
-        if (
-            !(c >= '0' && c <= '9')
-            && !(c >= 'a' && c <= 'z')
-            && !(c >= 'A' && c <= 'Z')
-            && c != '/'
-            && c != '.'
-            && c != '-'
-            && c != '_'
-        ) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-function validateExtName(extName) {
-    if (
-        !extName
-        || !util.isString(extName)
-        || extName.length == 0
-        || extName.length > 16
-    ) {
-        return false;
-    }
-    
-    for(let i = 0; i < extName.length; i++) {
-        let c = extName[i];
-        if (
-            !(c >= '0' && c <= '9')
-            && !(c >= 'a' && c <= 'z')
-            && !(c >= 'A' && c <= 'Z')
-        ) {
-            return false;
-        }
-    }
-
-    return true;
-}
 
 function generateUploadToken(bucket, key) {
     var putPolicy = new qiniu.rs.PutPolicy(bucket + ":" + key);
@@ -69,7 +18,7 @@ function generateUploadToken(bucket, key) {
 
 function uploadFile(token, key, localFile) {
     return new Promise((resolve, reject) => {
-        if (!validateKey(key)) {
+        if (!helper.validateStorageKey(key)) {
             reject("Invalid key");
             return;
         }
@@ -84,7 +33,7 @@ function uploadFile(token, key, localFile) {
 }
 
 function getDownloadUrl(key) {
-    if (!validateKey(key)) return;
+    if (!helper.validateStorageKey(key)) return;
     let url = "http://" + qnCfg.domain + "/" + key;
     let policy = new qiniu.rs.GetPolicy();
     let downloadUrl = policy.makeRequest(url);
@@ -93,7 +42,7 @@ function getDownloadUrl(key) {
 
 function getFileInfo(key) {
     return new Promise((resolve, reject) => {
-        if(!validateKey(key)) {
+        if(!helper.validateStorageKey(key)) {
             reject("Invalid key");
             return;
         }
@@ -180,7 +129,7 @@ async function requestClientUpload(username, extName) {
     if (!username || resources.adminUserList.indexOf(username) < 0) {
         throw "User is not in admin list";
     }
-    if(!validateExtName(extName)) {
+    if(!helper.validateExtName(extName)) {
         throw "Invalid extName";
     }
     let uploadId = uuid.v4();
@@ -210,7 +159,7 @@ async function requestClientUpload(username, extName) {
     };
 }
 
-module.exports.validateKey = validateKey;
+module.exports.validateKey = helper.validateStorageKey;
 module.exports.generateUploadToken = generateUploadToken;
 module.exports.uploadFile = uploadFile;
 module.exports.getDownloadUrl = getDownloadUrl;

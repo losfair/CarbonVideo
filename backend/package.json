@@ -4,6 +4,7 @@
   "description": "CarbonVideo Backend",
   "main": "main.js",
   "scripts": {
+    "start": "node --harmony ./main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -23,7 +24,9 @@
   "homepage": "https://github.com/losfair/CarbonVideo#readme",
   "dependencies": {
     "body-parser": "^1.15.2",
+    "carbonvideo-backend-helper": "file:///home/zhy/Projects/CarbonVideo/backend-helper",
     "express": "^4.14.0",
+    "express-rate-limit": "^2.6.0",
     "mongodb": "^2.2.16",
     "qiniu": "^6.1.13",
     "randomstring": "^1.1.5",

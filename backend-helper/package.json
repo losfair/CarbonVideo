@@ -1,0 +1,35 @@
+{
+  "name": "carbonvideo-backend-helper",
+  "version": "0.1.0",
+  "description": "CarbonVideo Backend Helper",
+  "main": "build/Release/CarbonVideoBackendHelper",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "files": [
+    "*.cc",
+    "*.h",
+    "*.js",
+    "binding.gyp"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/losfair/CarbonVideo.git"
+  },
+  "keywords": [
+    "carbonvideo",
+    "video",
+    "carbon",
+    "helper",
+    "backend"
+  ],
+  "author": "Heyang Zhou",
+  "license": "LGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/losfair/CarbonVideo/issues"
+  },
+  "homepage": "https://github.com/losfair/CarbonVideo#readme",
+  "dependencies": {
+    "nan": "^2.5.0"
+  }
+}
