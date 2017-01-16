@@ -8,7 +8,7 @@ import * as pageModules from "./pageModules.js";
 
 async function jumpToSsoLogin() {
     let url = await authUtils.getSsoUrl();
-    window.location.replace(url + "identity/user/login?callback=" + encodeURIComponent(window.location.href.split("?")[0]));
+    window.location.replace(url + "web/?callback=" + encodeURIComponent(window.location.href.split("?")[0]) + "#auth");
 }
 
 async function getSiteTitle() {
