@@ -24,7 +24,6 @@
   "homepage": "https://github.com/losfair/CarbonVideo#readme",
   "dependencies": {
     "body-parser": "^1.15.2",
-    "carbonvideo-backend-helper": "file:///home/zhy/Projects/CarbonVideo/backend-helper",
     "event-stream-service-sdk": "^0.1.0",
     "express": "^4.14.0",
     "express-rate-limit": "^2.6.0",
