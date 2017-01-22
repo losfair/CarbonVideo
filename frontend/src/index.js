@@ -56,12 +56,12 @@ async function initPage() {
     initEventListeners();
     initGlobalExports();
 
-    let siteTitle = await getSiteTitle();
-
-    if(siteTitle) {
-        document.title = siteTitle;
-        document.getElementById("navbar-site-title").innerHTML = siteTitle;
-    }
+    getSiteTitle().then(siteTitle => {
+        if(siteTitle) {
+            document.title = siteTitle;
+            document.getElementById("navbar-site-title").innerHTML = siteTitle;
+        }
+    }).catch(e => console.log(e));
 
     if(pageUtils.getParameterByName("client_token")) {
         let result = await authUtils.doSsoAuthenticate(pageUtils.getParameterByName("client_token"));

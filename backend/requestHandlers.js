@@ -1,10 +1,12 @@
 const util = require("util");
 const rp = require("request-promise");
+const crypto = require("crypto");
 const resources = require("./resources.js");
 const tokenManager = require("./tokenManager.js");
 const videoManager = require("./videoManager.js");
 const commentManager = require("./commentManager.js");
 const fileManager = require("./fileManager.js");
+const eventStreamAPI = require("event-stream-service-sdk");
 
 async function verifyRequest(req, resp, args, requireAuth) {
     let returnValueOnSuccess = true;
@@ -89,9 +91,17 @@ async function onUserAuthenticate(args) {
         throw "Authentication failed";
     }
 
+    let eventId = await eventStreamAPI.addEvent(
+        crypto.createHash("md5").update(data.username).digest("hex"),
+        resources.cfg.siteTitle + ": 用户登录",
+        "",
+        Date.now()
+    );
+
     let newToken = await tokenManager.createToken(data.username);
     return {
-        "token": newToken
+        "token": newToken,
+        "eventId": eventId
     };
 }
 

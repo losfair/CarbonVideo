@@ -18,7 +18,7 @@ async function run() {
 
     let rateLimitRule = new RateLimit({
         "windowMs": 2 * 60 * 1000, // 2 mins
-        "delayAfter": 60,
+        "delayAfter": 150,
         "delayMs": 100,
         "max": 300,
         "message": JSON.stringify({
