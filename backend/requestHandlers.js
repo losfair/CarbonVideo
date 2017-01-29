@@ -6,7 +6,6 @@ const tokenManager = require("./tokenManager.js");
 const videoManager = require("./videoManager.js");
 const commentManager = require("./commentManager.js");
 const fileManager = require("./fileManager.js");
-const eventStreamAPI = require("event-stream-service-sdk");
 
 async function verifyRequest(req, resp, args, requireAuth) {
     let returnValueOnSuccess = true;
@@ -84,21 +83,22 @@ async function onUserAuthenticate(args) {
     if (
         !data
         || data.err !== 0
-        || !data.username
         || !util.isString(data.username)
+        || !util.isString(data.userId)
         || (resources.cfg.domain && (!data.domain || data.domain != resources.cfg.domain))
     ) {
         throw "Authentication failed";
     }
 
-    let eventId = await eventStreamAPI.addEvent(
-        crypto.createHash("md5").update(data.username).digest("hex"),
-        resources.cfg.siteTitle + ": 用户登录",
+    let eventId;
+    await resources.eventStreamAPI.addEvent(
+        data.userId,
+        "用户登录",
         "",
         Date.now()
     );
 
-    let newToken = await tokenManager.createToken(data.username);
+    let newToken = await tokenManager.createToken(data.userId, data.username);
     return {
         "token": newToken,
         "eventId": eventId
@@ -116,17 +116,17 @@ async function onUserCheck(args, username) {
     }
 }
 
-async function onNewVideo(args, username) {
+async function onNewVideo(args, username, userId) {
     let videoId;
-    videoId = await videoManager.createVideo(username, args.videoTitle, args.videoKey, args.videoDesc);
+    videoId = await videoManager.createVideo(userId, username, args.videoTitle, args.videoKey, args.videoDesc);
 
     return {
         "videoId": videoId
     };
 }
 
-async function onRemoveVideo(args, username) {
-    let result = await videoManager.removeVideo(username, args.videoId);
+async function onRemoveVideo(args, username, userId) {
+    let result = await videoManager.removeVideo(userId, username, args.videoId);
     if(!result) throw "Unable to remove video";
     return {};
 }
@@ -213,6 +213,12 @@ async function onCheckClientVideoUpload(args, username) {
     let result = await fileManager.checkClientUpload(args.uploadId, username);
     if(!result) throw "Unable to check client upload";
     return {};
+}
+
+async function onGetServiceId(args) {
+    return {
+        "serviceId": resources.cfg.serviceId
+    };
 }
 
 const handlers = {
@@ -357,6 +363,11 @@ const handlers = {
                 "type": "string"
             }
         ]
+    },
+    "getServiceId": {
+        "requireAuth": false,
+        "func": onGetServiceId,
+        "args": []
     }
 };
 
@@ -374,10 +385,14 @@ function onRequest(handlerName) {
         if (!result) return;
 
         let username = "";
-        if(targetHandler.requireAuth) username = result;
+        let userId = "";
+        if(targetHandler.requireAuth) {
+            username = result.username;
+            userId = result.userId;
+        }
 
         try {
-            result = await targetHandler.func(req.body, username);
+            result = await targetHandler.func(req.body, username, userId);
             if(!result) throw "Empty response from target handler";
             if(!util.isObject(result)) throw "Response is not an object";
         } catch(e) {

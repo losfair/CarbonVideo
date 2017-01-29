@@ -1,10 +1,9 @@
 const resources = require("./resources.js");
 const uuid = require("uuid");
 const fileManager = require("./fileManager.js");
-const eventStreamAPI = require("event-stream-service-sdk");
 const crypto = require("crypto");
 
-async function createVideo(username, title, key, desc) {
+async function createVideo(userId, username, title, key, desc) {
     if(resources.adminUserList.indexOf(username) < 0) {
         return null;
     }
@@ -23,16 +22,16 @@ async function createVideo(username, title, key, desc) {
         "videoCreateTime": Date.now()
     };
     await resources.db.collection("videos").insertOne(videoInfo);
-    await eventStreamAPI.addEvent(
-        crypto.createHash("md5").update(username).digest("hex"),
-        resources.cfg.siteTitle + ": 创建视频",
+    await resources.eventStreamAPI.addEvent(
+        userId,
+        "创建视频",
         "创建视频: " + title,
         Date.now()
     );
     return videoId;
 }
 
-async function removeVideo(username, videoId) {
+async function removeVideo(userId, username, videoId) {
     if(resources.adminUserList.indexOf(username) < 0) {
         return null;
     }
@@ -51,9 +50,9 @@ async function removeVideo(username, videoId) {
         "_id": result._id
     });
 
-    await eventStreamAPI.addEvent(
-        crypto.createHash("md5").update(username).digest("hex"),
-        resources.cfg.siteTitle + ": 移除视频",
+    await resources.eventStreamAPI.addEvent(
+        userId,
+        "移除视频",
         "移除视频: " + result.videoTitle,
         Date.now()
     );

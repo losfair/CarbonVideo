@@ -1,5 +1,6 @@
 const mongodb = require("mongodb").MongoClient;
 const fs = require("fs");
+const eventStreamSDK = require("event-stream-service-sdk");
 
 let isInitialized = false;
 let db;
@@ -11,6 +12,8 @@ async function init() {
 
     cfg = JSON.parse(fs.readFileSync("config/general.json", "utf-8"));
     module.exports.cfg = cfg;
+
+    module.exports.eventStreamAPI = new eventStreamSDK.Context(cfg.serviceId, cfg.secretKey);
 
     db = await mongodb.connect(cfg.mongodbUrl);
     module.exports.db = db;

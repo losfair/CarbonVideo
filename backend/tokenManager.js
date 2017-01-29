@@ -1,10 +1,11 @@
 const resources = require("./resources.js");
 const randomstring = require("randomstring");
 
-async function createToken(username) {
+async function createToken(userId, username) {
     let token = randomstring.generate(16);
     let tokenInfo = {
         "token": token,
+        "userId": userId,
         "username": username,
         "createTime": Date.now()
     };
@@ -27,7 +28,7 @@ async function checkToken(token) {
         return false;
     }
 
-    return result.username;
+    return result;
 }
 
 module.exports.createToken = createToken;

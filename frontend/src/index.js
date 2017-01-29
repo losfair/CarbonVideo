@@ -64,9 +64,20 @@ async function initPage() {
     }).catch(e => console.log(e));
 
     if(pageUtils.getParameterByName("client_token")) {
-        let result = await authUtils.doSsoAuthenticate(pageUtils.getParameterByName("client_token"));
-        if(!result) {
-            alert("无法完成 SSO 认证。");
+        let result;
+        try {
+            result = await authUtils.doSsoAuthenticate(pageUtils.getParameterByName("client_token"));
+        } catch(e) {
+            e = e.toString();
+            if(e == "Not authorized") {
+                let serviceId = await api.request("/config/service_id");
+                serviceId = serviceId.serviceId;
+                window.history.pushState({}, null, window.location.href.split("?")[0]);
+                pageUtils.showWarningBox("请在 <a href=\"https://hyperidentity.ifxor.com/web/\">HyperIdentity 个人中心</a>中授权本服务。(服务 ID: " + serviceId + " )")
+            } else {
+                pageUtils.showWarningBox("SSO 认证失败: " + e);
+            }
+            return;
         }
         localStorage.sessionToken = result;
         window.location.replace(window.location.href.split("?")[0]);

@@ -27,8 +27,9 @@ export async function doSsoAuthenticate(ssoToken) {
     });
 
     if(!resp || !resp.result || resp.result != "success") {
-        return false;
+        throw resp.msg;
     }
+    
     return resp.token;
 }
 

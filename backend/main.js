@@ -33,6 +33,7 @@ async function run() {
 
     app.post("/config/sso_url", requestHandlers.onRequest("getSsoUrl"));
     app.post("/config/site_title", requestHandlers.onRequest("getSiteTitle"));
+    app.post("/config/service_id", requestHandlers.onRequest("getServiceId"));
     app.post("/user/authenticate", requestHandlers.onRequest("userAuthenticate"));
     app.post("/user/check", requestHandlers.onRequest("userCheck"));
     app.post("/video/new", requestHandlers.onRequest("newVideo"));
