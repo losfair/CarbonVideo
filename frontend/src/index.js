@@ -8,7 +8,11 @@ import * as pageModules from "./pageModules.js";
 
 async function jumpToSsoLogin() {
     let url = await authUtils.getSsoUrl();
-    window.location.replace(url + "web/?callback=" + encodeURIComponent(window.location.href.split("?")[0]) + "#auth");
+
+    let serviceId = await api.request("/config/service_id");
+    serviceId = serviceId.serviceId;
+
+    window.location.replace(url + "web/?callback=" + encodeURIComponent(window.location.href.split("?")[0]) + "&serviceId=" + encodeURIComponent(serviceId) + "#auth");
 }
 
 async function getSiteTitle() {
