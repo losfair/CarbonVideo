@@ -3,13 +3,21 @@ const util = require("util");
 const express = require("express");
 const bodyParser = require("body-parser");
 const RateLimit = require("express-rate-limit");
+const servicehub = require("servicehub-sdk");
 const resources = require("./resources.js");
 const requestHandlers = require("./requestHandlers.js");
 
 let app;
+let servicehubContext = new servicehub.ServiceHubContext("172.16.8.1:6619");
 
 async function run() {
     await resources.init();
+
+    if(util.isString(resources.cfg.serviceName) && util.isString(resources.cfg.serviceAddr)) {
+        console.log("Registering service...");
+        await servicehubContext.register(resources.cfg.serviceName, resources.cfg.serviceAddr, true);
+        console.log("Done.");
+    }
 
     app = express();
 
