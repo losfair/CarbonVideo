@@ -1,29 +1,29 @@
 const path = require("path");
 const util = require("util");
-const express = require("express");
+const ice = require("ice-node");
+/*
 const bodyParser = require("body-parser");
 const RateLimit = require("express-rate-limit");
-const servicehub = require("servicehub-sdk");
+*/
 const resources = require("./resources.js");
 const requestHandlers = require("./requestHandlers.js");
 
 let app;
-let servicehubContext = new servicehub.ServiceHubContext("172.16.8.1:6619");
 
 async function run() {
     await resources.init();
 
     if(util.isString(resources.cfg.serviceName) && util.isString(resources.cfg.serviceAddr)) {
         console.log("Registering service...");
-        await servicehubContext.register(resources.cfg.serviceName, resources.cfg.serviceAddr, true);
         console.log("Done.");
     }
 
-    app = express();
+    app = new ice.Ice();
 
     let webDirectory = path.join(__dirname, "../web");
     if(resources.cfg.webDirectory) webDirectory = resources.cfg.webDirectory;
 
+    /*
     let rateLimitRule = new RateLimit({
         "windowMs": 2 * 60 * 1000, // 2 mins
         "delayAfter": 150,
@@ -35,9 +35,11 @@ async function run() {
         })
     });
     app.use(rateLimitRule);
+    */
 
-    app.use(express.static(webDirectory));
-    app.use(bodyParser.json());
+    app.use("/web/", ice.static(webDirectory));
+    app.use("/", req => req.body = req.json());
+    //app.use(bodyParser.json());
 
     app.post("/config/sso_url", requestHandlers.onRequest("getSsoUrl"));
     app.post("/config/site_title", requestHandlers.onRequest("getSiteTitle"));
@@ -58,7 +60,7 @@ async function run() {
     app.post("/comment/count", requestHandlers.onRequest("getCommentCount"));
 
     console.log("Listening on port " + resources.cfg.listenPort);
-    app.listen(resources.cfg.listenPort);
+    app.listen("0.0.0.0:" + resources.cfg.listenPort);
 }
 
 run();

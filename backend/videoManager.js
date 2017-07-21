@@ -22,12 +22,7 @@ async function createVideo(userId, username, title, key, desc) {
         "videoCreateTime": Date.now()
     };
     await resources.db.collection("videos").insertOne(videoInfo);
-    await resources.eventStreamAPI.addEvent(
-        userId,
-        "创建视频",
-        "创建视频: " + title,
-        Date.now()
-    );
+
     return videoId;
 }
 
@@ -49,13 +44,6 @@ async function removeVideo(userId, username, videoId) {
     await resources.db.collection("videos").remove({
         "_id": result._id
     });
-
-    await resources.eventStreamAPI.addEvent(
-        userId,
-        "移除视频",
-        "移除视频: " + result.videoTitle,
-        Date.now()
-    );
 
     await resources.db.collection("removedVideos").insertOne(result);
 

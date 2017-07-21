@@ -1,21 +1,19 @@
 const util = require("util");
 const rp = require("request-promise");
 const crypto = require("crypto");
+const ice = require("ice-node");
 const resources = require("./resources.js");
 const tokenManager = require("./tokenManager.js");
 const videoManager = require("./videoManager.js");
 const commentManager = require("./commentManager.js");
 const fileManager = require("./fileManager.js");
 
-async function verifyRequest(req, resp, args, requireAuth) {
-    let returnValueOnSuccess = true;
-
+async function verifyRequest(req, args, requireAuth) {
     if (!req.body) {
-        resp.send(JSON.stringify({
+        throw ice.Response.json({
             "result": "failed",
             "msg": "Bad request"
-        }));
-        return false;
+        });
     }
 
     if (requireAuth) {
@@ -35,26 +33,24 @@ async function verifyRequest(req, resp, args, requireAuth) {
             }
         });
     } catch(e) {
-        resp.send(JSON.stringify({
+        throw ice.Response.json({
             "result": "failed",
-            "msg": e.toString()
-        }));
-        return false;
+            "msg": "" + e
+        });
     }
 
     if (requireAuth) {
         let result = await tokenManager.checkToken(req.body.token);
         if (!result) {
-            resp.send(JSON.stringify({
+            throw ice.Response.json({
                 "result": "failed",
                 "msg": "Not logged in"
-            }));
-            return false;
+            });
         }
-        returnValueOnSuccess = result;
+        return result;
+    } else {
+        return true;
     }
-
-    return returnValueOnSuccess;
 }
 
 function onGetSsoUrl() {
@@ -91,12 +87,6 @@ async function onUserAuthenticate(args) {
     }
 
     let eventId;
-    await resources.eventStreamAPI.addEvent(
-        data.userId,
-        "用户登录",
-        "",
-        Date.now()
-    );
 
     let newToken = await tokenManager.createToken(data.userId, data.username);
     return {
@@ -375,14 +365,20 @@ function onRequest(handlerName) {
     let targetHandler = handlers[handlerName];
     if (!targetHandler) throw "Handler not found: " + handlerName;
 
-    return async function (req, resp) {
-        let result = await verifyRequest(
-            req,
-            resp,
-            targetHandler.args,
-            targetHandler.requireAuth
-        );
-        if (!result) return;
+    return async function (req) {
+        console.log("Got request");
+        
+        let result;
+        try {
+            result = await verifyRequest(
+                req,
+                targetHandler.args,
+                targetHandler.requireAuth
+            );
+        } catch(e) {
+            console.log(e);
+            return e;
+        }
 
         let username = "";
         let userId = "";
@@ -396,17 +392,16 @@ function onRequest(handlerName) {
             if(!result) throw "Empty response from target handler";
             if(!util.isObject(result)) throw "Response is not an object";
         } catch(e) {
-            resp.send(JSON.stringify({
+            return ice.Response.json({
                 "result": "failed",
                 "msg": e.toString()
-            }));
-            return;
+            });
         }
 
         result.result = "success";
         result.msg = "OK";
 
-        resp.send(JSON.stringify(result));
+        return ice.Response.json(result);
     }
 }
 
