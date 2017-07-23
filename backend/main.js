@@ -41,6 +41,8 @@ async function run() {
     app.use("/", req => req.body = req.json());
     //app.use(bodyParser.json());
 
+    app.get("/stats", req => ice.Response.json(req.get_stats(true)));
+
     app.post("/config/sso_url", requestHandlers.onRequest("getSsoUrl"));
     app.post("/config/site_title", requestHandlers.onRequest("getSiteTitle"));
     app.post("/config/service_id", requestHandlers.onRequest("getServiceId"));
